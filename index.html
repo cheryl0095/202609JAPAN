@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>大阪京都神戶奈良・旅行手帳</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F1E7;
+    --paper:#FFFDF8;
+    --paper-soft:#FBF6EC;
+    --ink:#2B2622;
+    --ink-soft:#726A5E;
+    --ink-faint:#A79E8E;
+    --line:rgba(43,38,34,.13);
+    --indigo:#22405C;
+    --indigo-deep:#152A3D;
+    --indigo-soft:#DCE4E9;
+    --vermillion:#BD4620;
+    --vermillion-soft:#F3DDCF;
+    --gold:#A9782B;
+    --gold-soft:#F1E4C6;
+    --plum:#6B4A73;
+    --plum-soft:#E9DEE9;
+    --jade:#4C7A5C;
+    --jade-soft:#DCE9DF;
+    --shadow: 0 1px 2px rgba(43,38,34,.06), 0 4px 14px rgba(43,38,34,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:
+      radial-gradient(circle at 100% 0%, rgba(189,70,32,.05), transparent 45%),
+      radial-gradient(circle at 0% 100%, rgba(34,64,92,.05), transparent 45%);
+    color:var(--ink);
+    font-family:'Noto Sans TC', -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    flex-direction:column;
+    min-height:100%;
+  }
+  h1,h2,h3,.serif{font-family:'Noto Serif TC', serif;}
+  button{font-family:inherit;}
+  input,textarea,select{font-family:inherit; color:inherit;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:30; flex:0 0 auto;
+    background:var(--indigo);
+    color:#F6F1E7;
+    padding:14px 18px 12px;
+    box-shadow:0 2px 10px rgba(21,42,61,.25);
+  }
+  .topbar .row{display:flex; align-items:baseline; justify-content:space-between; gap:10px; max-width:640px; margin:0 auto;}
+  .topbar h1{margin:0; font-size:19px; font-weight:600; letter-spacing:.02em;}
+  .topbar .dates{margin:2px 0 0; font-size:12px; color:#C9D6DE; letter-spacing:.02em;}
+  .topbar .countdown{
+    font-size:12px; white-space:nowrap; background:rgba(255,255,255,.12);
+    padding:5px 10px; border-radius:20px; color:#F6F1E7; flex-shrink:0;
+  }
+  .topbar .countdown b{color:#F0B79A;}
+
+  /* ---------- day chip row (itinerary only) ---------- */
+  .daychips{
+    position:sticky; top:64px; z-index:25;
+    display:flex; align-items:center; gap:8px;
+    flex:0 0 auto;
+    overflow-x:auto; overflow-y:hidden;
+    background:var(--paper-soft);
+    padding:8px 14px; border-bottom:1px solid var(--line);
+    scrollbar-width:none;
+    height:58px;
+  }
+  .daychips::-webkit-scrollbar{display:none;}
+  .daychip{
+    flex:0 0 auto; border:1px solid var(--line); background:var(--paper);
+    border-radius:12px; padding:7px 12px; font-size:12.5px; color:var(--ink-soft);
+    cursor:pointer; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:2px; white-space:nowrap;
+  }
+  .daychip .d{font-family:'Noto Serif TC',serif; font-weight:600; font-size:13.5px; color:var(--ink); line-height:1.2;}
+  .daychip .wd{line-height:1.2;}
+  .daychip.active{background:var(--indigo); border-color:var(--indigo);}
+  .daychip.active, .daychip.active .d, .daychip.active .wd{color:#fff;}
+  .daychip.today{box-shadow:0 0 0 2px var(--vermillion) inset;}
+
+  /* ---------- main ---------- */
+  main{flex:1; padding:16px 14px 96px; max-width:640px; width:100%; margin:0 auto;}
+  .section-title{
+    font-family:'Noto Serif TC',serif; font-size:15px; font-weight:600;
+    color:var(--ink); margin:22px 2px 10px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .section-title .sum{font-family:'Noto Sans TC',sans-serif; font-weight:500; font-size:12px; color:var(--ink-soft);}
+  .section-title:first-child{margin-top:2px;}
+
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:14px;
+    padding:13px 14px; margin-bottom:10px; box-shadow:var(--shadow); position:relative;
+  }
+  .card.done{opacity:.55;}
+
+  /* ---------- prep cards ---------- */
+  .prep-top{display:flex; align-items:flex-start; gap:8px;}
+  .prep-name{
+    flex:1; border:none; background:transparent; font-size:15px; font-weight:600;
+    color:var(--ink); padding:2px 0; min-width:0;
+  }
+  .status-tag{
+    flex:0 0 auto; border-radius:7px; padding:5px 6px; font-size:12px;
+    font-weight:700; white-space:nowrap; display:inline-flex; align-items:center;
+    letter-spacing:.01em; margin-top:1px;
+  }
+  .status-select-inline{
+    border:none; background:transparent; appearance:none; -webkit-appearance:none;
+    -moz-appearance:none; font:inherit; font-weight:700; font-size:12px; cursor:pointer;
+    padding:0 1px; color:inherit;
+  }
+  .status-select-inline:focus{outline:none;}
+  .status-待處理{background:var(--paper-soft); color:var(--ink-faint); border:1px solid var(--line);}
+  .status-處理中{background:var(--gold-soft); color:#7A5A18;}
+  .status-處理完成{background:var(--jade-soft); color:#33553F;}
+  .prep-meta-row{display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;}
+  .amt-input{
+    border:1px solid var(--line); border-radius:8px; background:var(--paper-soft);
+    font-size:12.5px; padding:5px 8px; width:88px; color:var(--ink-soft);
+  }
+  .curr-select{
+    border:1px solid var(--line); border-radius:8px; background:var(--paper-soft);
+    font-size:12px; padding:5px 6px; color:var(--ink-soft);
+  }
+  .converted{font-size:11.5px; color:var(--vermillion); font-weight:600; align-self:center;}
+  .rate-bar{
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    background:var(--indigo-soft); color:var(--indigo); border-radius:12px;
+    padding:9px 14px; margin-bottom:12px; font-size:12.5px; font-weight:600;
+  }
+  .rate-bar input{
+    width:60px; border:1px solid var(--line); border-radius:7px; background:var(--paper);
+    font-size:12.5px; padding:4px 6px; text-align:center; font-weight:700; color:var(--indigo);
+  }
+  .txt-input, .txt-area{
+    width:100%; border:1px solid var(--line); border-radius:8px; background:var(--paper-soft);
+    font-size:13px; padding:7px 9px; margin-top:8px; color:var(--ink);
+  }
+  .txt-area{resize:vertical; min-height:36px; line-height:1.45;}
+  .field-label{font-size:10.5px; color:var(--ink-faint); margin:8px 0 3px 2px; letter-spacing:.03em;}
+  .link-chip{
+    display:inline-flex; align-items:center; gap:4px; margin-top:8px; font-size:12px;
+    color:var(--indigo); background:var(--indigo-soft); padding:5px 10px; border-radius:8px;
+    text-decoration:none; word-break:break-all;
+  }
+  .row-actions{display:flex; justify-content:flex-end; margin-top:8px;}
+  .icon-btn{
+    border:none; background:none; color:var(--ink-faint); font-size:12px; cursor:pointer;
+    padding:4px 6px;
+  }
+  .icon-btn:hover{color:var(--vermillion);}
+  .add-btn{
+    display:block; width:100%; text-align:center; border:1.5px dashed var(--line);
+    background:transparent; color:var(--ink-soft); border-radius:12px; padding:10px;
+    font-size:13px; cursor:pointer; margin-top:4px;
+  }
+  .add-btn:hover{border-color:var(--indigo); color:var(--indigo);}
+
+  /* ---------- itinerary cards ---------- */
+  .day-summary{display:flex; justify-content:space-between; align-items:baseline; margin:14px 2px 10px;}
+  .day-summary .dtitle{font-family:'Noto Serif TC',serif; font-weight:600; font-size:16px;}
+  .day-summary .dcost{font-size:12px; color:var(--ink-soft);}
+  .day-route{
+    display:flex; flex-wrap:wrap; align-items:center; row-gap:6px; column-gap:7px;
+    padding:14px 2px 0; font-size:13.5px; color:var(--ink); line-height:1.5;
+  }
+  .day-route .stop{font-weight:600;}
+  .day-route .arrow{color:var(--vermillion); font-weight:700; font-size:12px;}
+  .itin-card{display:flex; gap:10px;}
+  .itin-time{flex:0 0 64px; text-align:right; padding-top:2px;}
+  .itin-time input{
+    width:64px; text-align:right; border:none; background:transparent; font-weight:700;
+    font-size:14.5px; color:var(--indigo); font-family:'Noto Serif TC',serif; padding:0;
+  }
+  .itin-dur{margin-top:4px; display:flex; flex-direction:column; align-items:flex-end; gap:2px;}
+  .itin-dur select{
+    border:none; background:var(--paper-soft); color:var(--ink-soft); font-size:12.5px;
+    width:64px; padding:3px 2px; border-radius:6px; text-align:right; font-weight:500;
+  }
+  .itin-dur select.dur-last{color:var(--ink-faint); font-style:italic;}
+  .itin-line{flex:0 0 auto; width:2px; background:var(--line); border-radius:2px; margin-top:4px;}
+  .itin-body{flex:1; min-width:0;}
+  .type-row{display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+  .type-badge-select{
+    border:none; border-radius:20px; padding:4px 22px 4px 10px; font-size:11.5px; font-weight:600;
+    cursor:pointer; appearance:none; -webkit-appearance:none; -moz-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23726A5E' stroke-width='2'><path d='M5 8l5 5 5-5'/></svg>");
+    background-repeat:no-repeat; background-position:right 6px center; background-size:12px;
+  }
+  .type-交通{background-color:var(--indigo-soft); color:var(--indigo);}
+  .type-景點{background-color:var(--vermillion-soft); color:var(--vermillion);}
+  .type-飯店{background-color:var(--plum-soft); color:var(--plum);}
+  .type-吃飯{background-color:var(--gold-soft); color:#7A5A18;}
+  .type-空{background-color:var(--paper-soft); color:var(--ink-faint); border:1px solid var(--line);}
+  .itin-last-note{font-size:11px; color:var(--ink-faint); margin-top:4px; text-align:right;}
+  .done-toggle{
+    margin-left:auto; width:22px; height:22px; border-radius:50%; border:1.5px solid var(--line);
+    background:var(--paper); cursor:pointer; flex:0 0 auto; font-size:12px; line-height:1;
+    display:flex; align-items:center; justify-content:center; color:transparent;
+  }
+  .done-toggle.on{background:var(--jade); border-color:var(--jade); color:#fff;}
+  .itin-desc{
+    width:100%; border:none; background:transparent; font-size:14.5px; font-weight:500;
+    color:var(--ink); padding:0; line-height:1.5; resize:none; overflow:hidden;
+  }
+  .itin-sub{display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; align-items:center;}
+  .item-input{
+    border:1px solid var(--line); background:var(--paper-soft); border-radius:8px;
+    font-size:12px; padding:5px 8px; flex:1; min-width:88px; color:var(--ink-soft);
+  }
+  .status-select{
+    border:1px solid var(--line); background:var(--paper-soft); border-radius:8px;
+    font-size:12px; padding:5px 6px; color:var(--ink-soft);
+  }
+  .itin-note{margin-top:8px;}
+
+  /* ---------- shopping ---------- */
+  .filter-row{margin:2px 2px 10px;}
+  .filter-label{
+    display:block; font-family:'Noto Serif TC',serif; font-weight:600; font-size:12.5px;
+    color:var(--ink-soft); margin-bottom:6px;
+  }
+  .who-tabs{display:flex; gap:8px; margin:0; flex-wrap:wrap;}
+  .who-tab{
+    border:1px solid var(--line); background:var(--paper); border-radius:20px;
+    padding:6px 14px; font-size:12.5px; color:var(--ink-soft); cursor:pointer;
+  }
+  .who-tab.active{background:var(--vermillion); border-color:var(--vermillion); color:#fff;}
+  .who-tab.channel-tab.active{background:var(--indigo); border-color:var(--indigo);}
+  .who-group-title{
+    font-family:'Noto Serif TC',serif; font-weight:600; font-size:14.5px; margin:20px 2px 10px;
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .who-group-title .gsub{font-family:'Noto Sans TC',sans-serif; font-weight:500; font-size:12px; color:var(--ink-soft);}
+  .channel-pills{display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;}
+  .channel-pill{
+    border:1px solid var(--line); background:var(--paper-soft); border-radius:16px;
+    padding:5px 11px; font-size:11.5px; color:var(--ink-soft); cursor:pointer;
+  }
+  .channel-pill.active{background:var(--indigo); border-color:var(--indigo); color:#fff;}
+  .shop-card{display:flex; gap:12px;}
+  .imgSlot{
+    flex:0 0 116px; width:116px; height:230px; border-radius:10px; overflow:hidden;
+    border:1px solid var(--line); background:var(--paper-soft); cursor:zoom-in; position:relative;
+  }
+  .imgSlot.active{border-color:var(--vermillion); border-style:solid; background:var(--vermillion-soft); color:var(--vermillion);}
+  .imgSlot img{width:100%; height:100%; object-fit:contain;}
+  .shop-body{flex:1; min-width:0;}
+  .shop-top{display:flex; gap:8px; align-items:flex-start;}
+  .shop-name{flex:1; border:none; background:transparent; font-size:14.5px; font-weight:600; color:var(--ink); padding:1px 0; min-width:0;}
+  .buy-toggle{
+    flex:0 0 auto; width:22px; height:22px; border-radius:6px; border:1.5px solid var(--line);
+    background:var(--paper); cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-size:13px; color:transparent;
+  }
+  .buy-toggle.on{background:var(--jade); border-color:var(--jade); color:#fff;}
+  .shop-variant{width:100%; border:none; background:transparent; font-size:12px; color:var(--ink-soft); padding:0; margin-top:2px;}
+  .shop-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px;}
+  .shop-grid label{font-size:9.5px; color:var(--ink-faint); display:block; margin-bottom:2px;}
+  .shop-grid input{width:100%; border:1px solid var(--line); background:var(--paper-soft); border-radius:7px; font-size:12px; padding:5px 7px;}
+  .imgActions{display:flex; align-items:center; gap:6px; margin-top:6px; flex-wrap:wrap;}
+  .mini-btn{border:1px solid var(--line); background:var(--paper-soft); color:var(--ink-soft); font-size:10.5px; padding:4px 9px; border-radius:7px; cursor:pointer; white-space:nowrap;}
+  .paste-hint{font-size:10px; color:var(--vermillion); font-weight:600;}
+  .total-bar{
+    position:sticky; bottom:64px; z-index:20; background:var(--indigo-deep); color:#F6F1E7;
+    padding:9px 16px; border-radius:12px; margin:10px 2px 4px; display:flex; justify-content:space-between;
+    font-size:12.5px; box-shadow:var(--shadow);
+  }
+  .total-bar b{color:#F0B79A; font-size:14px; margin-left:4px;}
+
+
+  /* ---------- money block (shared) ---------- */
+  .price-field{
+    display:flex; align-items:center; gap:5px; flex:1; min-width:0;
+    border:1px solid var(--line); background:var(--paper); border-radius:9px; padding:0 10px; min-height:42px;
+  }
+  .price-field .cur-sym{font-size:12.5px; font-weight:700; color:var(--ink-faint); flex:0 0 auto;}
+  .price-field input{width:100%; min-width:0; border:none; background:transparent; font-size:16px; font-weight:600; padding:0;}
+  .qty-select{
+    appearance:none; -webkit-appearance:none; -moz-appearance:none; cursor:pointer;
+    border:1px solid var(--line); background-color:var(--paper); border-radius:9px;
+    padding:0 28px 0 12px; min-height:42px; font-size:15px; font-weight:600; color:var(--ink);
+    background-image:linear-gradient(45deg,transparent 50%,var(--ink-faint) 50%),linear-gradient(135deg,var(--ink-faint) 50%,transparent 50%);
+    background-position:calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+    background-size:5px 5px, 5px 5px; background-repeat:no-repeat;
+  }
+  .channel-pill.add-chan{border-style:dashed; color:var(--indigo); background:transparent;}
+  .who-tab.add-chan{border-style:dashed; color:var(--indigo);}
+
+  .calc-line{display:flex; align-items:center; gap:6px; margin-top:10px; flex-wrap:wrap;}
+  .cur-chip{
+    flex:0 0 auto; border:1px solid var(--indigo); background:var(--indigo); color:#fff;
+    border-radius:9px; padding:0 10px; min-height:40px; font-size:12px; font-weight:700; cursor:pointer; letter-spacing:.03em;
+  }
+  .cur-chip.ntd{background:var(--vermillion); border-color:var(--vermillion);}
+  .calc-line .op{font-size:13px; color:var(--ink-faint); flex:0 0 auto;}
+  .calc-line .price-field{flex:0 0 116px; min-width:0; min-height:40px; padding:0 8px;}
+  .calc-line .price-field input{font-size:15px;}
+  .calc-line .qty-select{
+    flex:0 0 62px; min-height:40px; padding:0 22px 0 9px; font-size:14px;
+    background-position:calc(100% - 12px) 50%, calc(100% - 8px) 50%;
+  }
+  .calc-sum{display:flex; align-items:baseline; gap:5px; flex:0 0 auto;}
+  .calc-sum .sum-main{font-family:'Noto Serif TC',serif; font-size:18px; font-weight:700; color:var(--indigo-deep);}
+  .calc-sum .sum-alt{font-size:11.5px; color:var(--ink-soft);}
+  .mini-btn.on{background:var(--vermillion); border-color:var(--vermillion); color:#fff;}
+
+  /* ---------- image viewer ---------- */
+  .viewer-overlay{
+    position:fixed; inset:0; z-index:60; background:rgba(21,42,61,.72);
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .viewer-overlay.show{display:flex;}
+  .viewer-box{background:var(--paper); border-radius:14px; padding:14px; width:100%; max-width:340px; box-shadow:var(--shadow);}
+  .viewer-body{display:flex; justify-content:center;}
+  .viewer-full{max-width:100%; max-height:58vh; border-radius:10px; display:block;}
+  .crop-box{
+    width:180px; height:220px; border-radius:10px; overflow:hidden;
+    border:2px solid var(--vermillion); background:var(--paper-soft);
+    touch-action:none; cursor:grab;
+  }
+  .crop-box img{width:100%; height:100%; object-fit:cover; pointer-events:none; user-select:none; -webkit-user-drag:none;}
+  .viewer-hint{font-size:12px; color:var(--ink-soft); text-align:center; margin:10px 0 2px;}
+
+  /* ---------- tab bar ---------- */
+  .tabbar{
+    position:fixed; bottom:0; left:0; right:0; z-index:40;
+    display:flex; background:var(--paper); border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom, 0);
+    box-shadow:0 -2px 14px rgba(43,38,34,.08);
+  }
+  .tabbar button{
+    flex:1; border:none; background:none; padding:9px 4px 8px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:2px; color:var(--ink-faint);
+  }
+  .tabbar button .ic{font-size:19px;}
+  .tabbar button span{font-size:10.5px; letter-spacing:.02em;}
+  .tabbar button.active{color:var(--vermillion);}
+
+  .empty-note{text-align:center; color:var(--ink-faint); font-size:12.5px; padding:30px 10px;}
+  .storage-banner{
+    position:sticky; top:64px; z-index:26; background:#F3DDCF; color:#7A3B1A;
+    font-size:12px; padding:8px 14px; text-align:center; border-bottom:1px solid var(--line);
+  }
+
+  /* ---------- custom modal (replaces native confirm/prompt, which iframes can block) ---------- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; z-index:100; background:rgba(21,20,18,.45);
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--paper); border-radius:16px; padding:20px; width:100%; max-width:340px;
+    box-shadow:0 10px 40px rgba(0,0,0,.25);
+  }
+  .modal-msg{font-size:14.5px; color:var(--ink); line-height:1.5; margin-bottom:12px; font-weight:500;}
+  .modal-input{
+    display:none; width:100%; border:1px solid var(--line); border-radius:9px; background:var(--paper-soft);
+    font-size:14px; padding:9px 11px; margin-bottom:14px; color:var(--ink);
+  }
+  .modal-input.show{display:block;}
+  .modal-actions{display:flex; gap:8px; justify-content:flex-end;}
+  .modal-btn{border:none; border-radius:9px; padding:8px 16px; font-size:13.5px; font-weight:600; cursor:pointer;}
+  .modal-btn-cancel{background:var(--paper-soft); color:var(--ink-soft); border:1px solid var(--line);}
+  .modal-btn-ok{background:var(--vermillion); color:#fff;}
+  @media (min-width:640px){ main{padding-left:0; padding-right:0;} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="row">
+    <div>
+      <h1 id="pageTitle">行前準備</h1>
+      <p class="dates">🇯🇵 大阪・京都・神戶・奈良　8天7夜</p>
+    </div>
+    <div class="countdown" id="countdown"></div>
+  </div>
+</div>
+
+<div class="daychips" id="daychips" style="display:none;"></div>
+
+<main id="view"></main>
+
+<nav class="tabbar">
+  <button data-tab="prep" class="active"><span class="ic">📋</span><span>行前準備</span></button>
+  <button data-tab="luggage"><span class="ic">🧳</span><span>行李準備</span></button>
+  <button data-tab="itin"><span class="ic">🗓️</span><span>詳細行程</span></button>
+  <button data-tab="shop"><span class="ic">🛍️</span><span>代購清單</span></button>
+</nav>
+
+<input type="file" id="fileInput" accept="image/*" style="display:none">
+
+<div id="imgViewer" class="viewer-overlay">
+  <div class="viewer-box">
+    <div id="imgViewerBody" class="viewer-body"></div>
+    <p id="imgViewerHint" class="viewer-hint"></p>
+    <div id="imgViewerActions" class="modal-actions"></div>
+  </div>
+</div>
+
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal-box">
+    <div id="modalMsg" class="modal-msg"></div>
+    <input id="modalInput" class="modal-input" type="text">
+    <div class="modal-actions">
+      <button id="modalCancel" class="modal-btn modal-btn-cancel">取消</button>
+      <button id="modalOk" class="modal-btn modal-btn-ok">確定</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+/* ============ Firebase 雲端同步設定 ============ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import {
+  initializeFirestore, doc, getDoc, setDoc, deleteDoc
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCAkrpaDCe5MiFNkUEBIoS540hr4lU_tbU",
+  authDomain: "japan-5863b.firebaseapp.com",
+  projectId: "japan-5863b",
+  storageBucket: "japan-5863b.firebasestorage.app",
+  messagingSenderId: "998123541236",
+  appId: "1:998123541236:web:a7ae14194e3fbc304404a1",
+  measurementId: "G-581H5KM4WE"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = initializeFirestore(firebaseApp, {
+  experimentalAutoDetectLongPolling: true, // 自動偵測是否需要改用 long polling，解決某些網路環境下連線卡住不回應的問題
+  useFetchStreams: false
+});
+const DATA_COLLECTION = 'travelData'; // 所有資料都存在這個 Firestore collection 裡，每一筆的文件 ID 就是原本的 key
+
+/* 把任何漏接的錯誤都印出來，方便日後直接從 Console 判斷問題 */
+window.addEventListener('error', (e)=> console.error('[全域錯誤]', e.error || e.message));
+window.addEventListener('unhandledrejection', (e)=> console.error('[未處理的 Promise 錯誤]', e.reason));
+
+/* ============ seed data ============ */
+const SEED_PREP = [{"id": "p1", "cat": "行前準備", "name": "機場來回接送", "amount": "1045", "currency": "ntd", "link": "https://www.kkday.com/zh-tw/trans/airport_transfer?cid=2636&ud1=P2P&ud2=airport_transfer&ud3=sa&ud4=tw&ud5=21209710557&adid=10101002&gad_source=1&gad_campaignid=21209710557&gclid=CjwKCAjw1vXTBhB-EiwAEKr_k7SLDr8-DPOMStu_plSjcr0wTGFFEkhn1U-bZwPw0eKaV1WIGgxw8BoCOq4QAvD_BwE", "note": "KKDAY(去程$996+回程$1094=$2090/一人$1045)", "status": "處理完成", "remark": "記得改住址"}, {"id": "p2", "cat": "行前準備", "name": "保險", "amount": "784", "currency": "ntd", "link": "", "note": "新安東京海上(旅遊綜合險)", "status": "處理完成", "remark": ""}, {"id": "p3", "cat": "行前準備", "name": "ESIM", "amount": "630", "currency": "ntd", "link": "", "note": "KKDAY", "status": "處理完成", "remark": ""}, {"id": "p4", "cat": "行前準備", "name": "Visit Japan Web", "amount": "0", "currency": "ntd", "link": "", "note": "填寫完成，出發前截圖QRCODE", "status": "處理完成", "remark": ""}, {"id": "p5", "cat": "需預約", "name": "嵯峨野小火車車票", "amount": "880", "currency": "jpy", "link": "https://ars-saganokanko.triplabo.jp/activity/zt/LINKTIVITY-YRBTL", "note": "8/20預定／雙數靠窗", "status": "處理完成", "remark": ""}, {"id": "p6", "cat": "需預約", "name": "環球影城門票", "amount": "2007", "currency": "ntd", "link": "", "note": "可樂旅遊 總金額$4014", "status": "處理完成", "remark": ""}, {"id": "p7", "cat": "需預約", "name": "環球影城快通", "amount": "3409", "currency": "ntd", "link": "", "note": "KLOOK\n快速通關券4 - Minion & Hollywood Dream The Ride", "status": "處理完成", "remark": ""}];
+const SEED_LUGGAGE = [{"id": "l1", "cat": "證件與金錢", "name": "護照（確認效期是否還有6個月以上）", "note": "", "packed": false}, {"id": "l2", "cat": "證件與金錢", "name": "護照影本／備份照片（存手機或雲端）", "note": "", "packed": false}, {"id": "l3", "cat": "證件與金錢", "name": "Visit Japan Web QR截圖", "note": "", "packed": false}, {"id": "l4", "cat": "證件與金錢", "name": "機票、訂房電子憑證", "note": "", "packed": false}, {"id": "l5", "cat": "證件與金錢", "name": "信用卡", "note": "", "packed": false}, {"id": "l6", "cat": "證件與金錢", "name": "日幣現金", "note": "", "packed": false}, {"id": "l7", "cat": "證件與金錢", "name": "旅平險保單／保險證明", "note": "", "packed": false}, {"id": "l8", "cat": "電子產品", "name": "手機", "note": "", "packed": false}, {"id": "l9", "cat": "電子產品", "name": "手機充電線／充電頭", "note": "", "packed": false}, {"id": "l10", "cat": "電子產品", "name": "行動電源（要有安全標章）", "note": "", "packed": false}, {"id": "l11", "cat": "電子產品", "name": "相機／記憶卡／充電器", "note": "", "packed": false}, {"id": "l12", "cat": "電子產品", "name": "轉接頭（如需要）", "note": "", "packed": false}, {"id": "l13", "cat": "電子產品", "name": "耳機", "note": "", "packed": false}, {"id": "l14", "cat": "電子產品", "name": "eSIM／Wifi機", "note": "", "packed": false}, {"id": "l15", "cat": "衣物", "name": "上衣（依天數準備）", "note": "", "packed": false}, {"id": "l16", "cat": "衣物", "name": "褲子／裙子", "note": "", "packed": false}, {"id": "l17", "cat": "衣物", "name": "內衣褲（依天數準備）", "note": "", "packed": false}, {"id": "l18", "cat": "衣物", "name": "襪子", "note": "", "packed": false}, {"id": "l19", "cat": "衣物", "name": "薄外套／防風外套", "note": "", "packed": false}, {"id": "l20", "cat": "衣物", "name": "睡衣", "note": "", "packed": false}, {"id": "l21", "cat": "衣物", "name": "好走的鞋子", "note": "", "packed": false}, {"id": "l22", "cat": "衣物", "name": "摺疊傘／雨具", "note": "", "packed": false}, {"id": "l23", "cat": "盥洗與藥品", "name": "牙刷牙膏", "note": "", "packed": false}, {"id": "l24", "cat": "盥洗與藥品", "name": "保養品／保濕乳", "note": "", "packed": false}, {"id": "l25", "cat": "盥洗與藥品", "name": "卸妝／洗面乳", "note": "", "packed": false}, {"id": "l26", "cat": "盥洗與藥品", "name": "個人藥物", "note": "", "packed": false}, {"id": "l27", "cat": "盥洗與藥品", "name": "暈車藥", "note": "", "packed": false}, {"id": "l28", "cat": "盥洗與藥品", "name": "隱形眼鏡／眼鏡", "note": "", "packed": false}, {"id": "l29", "cat": "盥洗與藥品", "name": "生理用品", "note": "", "packed": false}, {"id": "l30", "cat": "其他雜項", "name": "環保購物袋（裝代購戰利品）", "note": "", "packed": false}, {"id": "l31", "cat": "其他雜項", "name": "夾鏈袋／收納袋", "note": "", "packed": false}, {"id": "l32", "cat": "其他雜項", "name": "筆（填寫入境表用）", "note": "", "packed": false}, {"id": "l33", "cat": "其他雜項", "name": "隨身小包", "note": "", "packed": false}, {"id": "l34", "cat": "其他雜項", "name": "面紙／濕紙巾", "note": "", "packed": false}, {"id": "l35", "cat": "其他雜項", "name": "行李秤（怕超重）", "note": "", "packed": false}];
+const DEFAULT_RATE = 0.21; // 1 JPY = 0.21 TWD
+const SEED_ITIN = [{"id": "i1", "date": "2026/09/19", "weekday": "週六", "time": "06:30", "durH": "1小時", "durM": "30分鐘", "type": "", "desc": "起床+梳洗+準備出門", "item": "", "status": "無", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i2", "date": "2026/09/19", "weekday": "週六", "time": "08:00", "durH": "1小時", "durM": "0分鐘", "type": "交通", "desc": "家裡➔桃機（機場接送）", "item": "機場接送", "status": "已預約/購買", "jpy": "", "ntd": "NT$498", "note": "$996", "done": false}, {"id": "i3", "date": "2026/09/19", "weekday": "週六", "time": "09:00", "durH": "2小時", "durM": "5分鐘", "type": "交通", "desc": "抵達桃園國際機場（TPE）", "item": "", "status": "無", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i4", "date": "2026/09/19", "weekday": "週六", "time": "11:05", "durH": "3小時", "durM": "45分鐘", "type": "交通", "desc": "TPE➔KIX", "item": "", "status": "無", "jpy": "", "ntd": "NT$13,760", "note": "", "done": false}, {"id": "i5", "date": "2026/09/19", "weekday": "週六", "time": "14:50", "durH": "1小時", "durM": "0分鐘", "type": "交通", "desc": "抵達關西國際機場 (KIX)", "item": "", "status": "無", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i6", "date": "2026/09/19", "weekday": "週六", "time": "15:50", "durH": "1小時", "durM": "10分鐘", "type": "交通", "desc": "離開機場+搭車（南海電鐵16:09➔難波16:54）", "item": "南海電鐵車票", "status": "現場購買", "jpy": "¥970", "ntd": "NT$204", "note": "https://www.nankai.co.jp/tc_railway/access-timetable\nhttps://finduheart.com/nankai-kix-osaka-2026-tickets", "done": false}, {"id": "i7", "date": "2026/09/19", "weekday": "週六", "time": "17:00", "durH": "0小時", "durM": "15分鐘", "type": "交通", "desc": "抵達難波車站+步行前往飯店（北出口步行800-1000m）\n飯店：住一心齋橋美國村店", "item": "", "status": "無", "jpy": "", "ntd": "NT$8,164", "note": "飯店總金額：NT$15768\n住宿稅：JPY¥2800(NT$560)", "done": false}, {"id": "i8", "date": "2026/09/19", "weekday": "週六", "time": "17:15", "durH": "0小時", "durM": "30分鐘", "type": "飯店", "desc": "抵達飯店+休息一下", "item": "", "status": "無", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i9", "date": "2026/09/19", "weekday": "週六", "time": "17:45", "durH": "5小時", "durM": "0分鐘", "type": "景點", "desc": "吃飯+逛街（道頓堀&心齋橋）", "item": "", "status": "無", "jpy": "", "ntd": "NT$0", "note": "GiGO 心齋橋／一番くじ公式ショップ 心斎橋PARCO店／心齋橋大丸百貨 (9樓JS)／TAITO STATION 大阪難波店／Donki／＃C-pla", "done": false}, {"id": "i10", "date": "2026/09/19", "weekday": "週六", "time": "22:45", "durH": "～休息", "durM": "", "type": "飯店", "desc": "洗洗睡啦", "item": "", "status": "無", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i11", "date": "2026/09/20", "weekday": "週日", "time": "07:00", "durH": "1小時", "durM": "10分鐘", "type": "飯店", "desc": "起床+梳洗+準備出門", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i12", "date": "2026/09/20", "weekday": "週日", "time": "08:10", "durH": "1小時", "durM": "0分鐘", "type": "吃飯", "desc": "出門+吃早餐（客美多咖啡 道頓堀店）", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i13", "date": "2026/09/20", "weekday": "週日", "time": "09:10", "durH": "0小時", "durM": "30分鐘", "type": "交通", "desc": "前往大阪城\n[難波]M御堂筋線➔[森之宮]N長堀鶴見綠地線", "item": "", "status": "", "jpy": "¥240", "ntd": "NT$50", "note": "從森之宮站大阪城小火車(¥400)直達通天閣(極樂橋/豐國神社)", "done": false}, {"id": "i14", "date": "2026/09/20", "weekday": "週日", "time": "09:40", "durH": "2小時", "durM": "0分鐘", "type": "景點", "desc": "大阪城晃晃（天守閣門票¥1200）", "item": "", "status": "", "jpy": "¥1,200", "ntd": "NT$252", "note": "https://www.gltjp.com/zh-hant/article/item/20379/#zh-7-87", "done": false}, {"id": "i15", "date": "2026/09/20", "weekday": "週日", "time": "11:40", "durH": "1小時", "durM": "0分鐘", "type": "交通", "desc": "前往梅田\n走or搭小火車到[大阪城公園車站]JR大阪環狀線➔[大阪車站]", "item": "", "status": "", "jpy": "¥180", "ntd": "NT$38", "note": "", "done": false}, {"id": "i16", "date": "2026/09/20", "weekday": "週日", "time": "12:40", "durH": "1小時", "durM": "15分鐘", "type": "吃飯", "desc": "吃午餐（銀座 篝 ルクア大阪店）", "item": "餐廳預約", "status": "無", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i17", "date": "2026/09/20", "weekday": "週日", "time": "13:55", "durH": "3小時", "durM": "30分鐘", "type": "景點", "desc": "逛街（Chiikawa Land、Mandarake Umeda、NU茶屋町、附近動漫店）", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i18", "date": "2026/09/20", "weekday": "週日", "time": "17:25", "durH": "2小時", "durM": "0分鐘", "type": "吃飯", "desc": "前往餐廳+吃飯（焼肉藤もと 梅田お初天神店）", "item": "餐廳預約", "status": "已預約/購買", "jpy": "", "ntd": "NT$0", "note": "Google reserve 17:30 兩位", "done": false}, {"id": "i19", "date": "2026/09/20", "weekday": "週日", "time": "19:25", "durH": "0小時", "durM": "30分鐘", "type": "交通", "desc": "從餐廳回飯店\n[西梅田]Y四橋線➔[難波]", "item": "", "status": "", "jpy": "¥240", "ntd": "NT$50", "note": "", "done": false}, {"id": "i20", "date": "2026/09/20", "weekday": "週日", "time": "19:55", "durH": "2小時", "durM": "0分鐘", "type": "景點", "desc": "逛一下(心齋橋&道頓堀附近)+買隔天早餐+走回飯店", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i21", "date": "2026/09/20", "weekday": "週日", "time": "21:55", "durH": "～休息", "durM": "", "type": "飯店", "desc": "洗洗睡啦", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i22", "date": "2026/09/21", "weekday": "週一", "time": "07:00", "durH": "1小時", "durM": "30分鐘", "type": "飯店", "desc": "起床+梳洗+吃早餐+準備出門", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i23", "date": "2026/09/21", "weekday": "週一", "time": "08:30", "durH": "1小時", "durM": "30分鐘", "type": "交通", "desc": "前往JR馬堀站\n[難波]M御堂筋線➔[梅田]➔[大阪車站]JR東海道/山陽本縣(新快速)➔[京都車站]➔[京都車站]JR山陰本縣➔馬堀站", "item": "", "status": "", "jpy": "¥1,360", "ntd": "NT$286", "note": "M御堂筋線¥240+（JR東海道/山陽本縣+JR山陰本縣）¥1120", "done": false}, {"id": "i24", "date": "2026/09/21", "weekday": "週一", "time": "10:00", "durH": "0小時", "durM": "10分鐘", "type": "交通", "desc": "從JR馬堀站走到嵯峨野小火車龜岡站(550m)", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i25", "date": "2026/09/21", "weekday": "週一", "time": "10:10", "durH": "0小時", "durM": "55分鐘", "type": "景點", "desc": "搭乘嵯峨野小火車（龜岡10:30➔嵐山10:53）", "item": "小火車車票", "status": "已預約/購買", "jpy": "¥880", "ntd": "NT$185", "note": "一個月前可購買（8/20預定｜第五節車廂+雙數靠窗）", "done": false}, {"id": "i26", "date": "2026/09/21", "weekday": "週一", "time": "11:05", "durH": "3小時", "durM": "30分鐘", "type": "景點", "desc": "逛逛（竹林小徑+御髪神社+渡月橋）\n吃飯（京都嵐山和牛 六重亭／牛カツ京都勝牛 嵐山店）", "item": "餐廳預約", "status": "無", "jpy": "¥3,500", "ntd": "NT$735", "note": "推薦六重亭的和牛鰻魚套餐(不能預約)", "done": false}, {"id": "i27", "date": "2026/09/21", "weekday": "週一", "time": "14:35", "durH": "0小時", "durM": "40分鐘", "type": "交通", "desc": "前往伏見稻荷大社\n嵯峨嵐山站[JR山陰本縣]➔[京都車站]➔[京都車站]JR奈良線➔[稻荷車站]", "item": "", "status": "", "jpy": "¥240", "ntd": "NT$50", "note": "", "done": false}, {"id": "i28", "date": "2026/09/21", "weekday": "週一", "time": "15:15", "durH": "2小時", "durM": "30分鐘", "type": "景點", "desc": "逛逛（伏見稻荷大社+吉伊卡哇本舖）", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i29", "date": "2026/09/21", "weekday": "週一", "time": "17:45", "durH": "0小時", "durM": "10分鐘", "type": "交通", "desc": "前往京都車站\n[稻荷車站]JR奈良線➔[京都車站]", "item": "", "status": "", "jpy": "¥150", "ntd": "NT$32", "note": "", "done": false}, {"id": "i30", "date": "2026/09/21", "weekday": "週一", "time": "17:55", "durH": "3小時", "durM": "0分鐘", "type": "景點", "desc": "逛逛+吃飯\n京都車站、Kyoto Avanti(6F)、友都八喜", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i31", "date": "2026/09/21", "weekday": "週一", "time": "20:55", "durH": "1小時", "durM": "0分鐘", "type": "交通", "desc": "回飯店\n[京都車站]JR東海道/山陽本縣➔[大阪車站]➔[梅田]M御堂筋線➔[難波]", "item": "", "status": "", "jpy": "¥820", "ntd": "NT$172", "note": "JR東海道/山陽本縣¥580+M御堂筋線¥240", "done": false}, {"id": "i32", "date": "2026/09/21", "weekday": "週一", "time": "21:55", "durH": "～休息", "durM": "", "type": "飯店", "desc": "飯店休息", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i33", "date": "2026/09/22", "weekday": "週二", "time": "07:30", "durH": "1小時", "durM": "0分鐘", "type": "飯店", "desc": "起床+梳洗+準備出門", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i34", "date": "2026/09/22", "weekday": "週二", "time": "08:30", "durH": "1小時", "durM": "0分鐘", "type": "吃飯", "desc": "前往+吃早餐\n溫蒂漢堡 難波戎橋店（800m）", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i35", "date": "2026/09/22", "weekday": "週二", "time": "09:30", "durH": "0小時", "durM": "45分鐘", "type": "交通", "desc": "前往大鳥大社\n[大國町]M御堂筋線➔[天王寺]➔[天王寺]JR阪和線➔[鳳]", "item": "", "status": "", "jpy": "¥510", "ntd": "NT$107", "note": "M御堂筋線¥190+JR坂和線¥320", "done": false}, {"id": "i36", "date": "2026/09/22", "weekday": "週二", "time": "10:15", "durH": "1小時", "durM": "0分鐘", "type": "景點", "desc": "逛逛（大鳥大社+買透明御守+透明御神籤）", "item": "", "status": "", "jpy": "¥1,800", "ntd": "NT$378", "note": "透明御守¥1500+透明御神籤¥300", "done": false}, {"id": "i37", "date": "2026/09/22", "weekday": "週二", "time": "11:15", "durH": "0小時", "durM": "40分鐘", "type": "交通", "desc": "前往天王寺MIO+JS+通天閣+新世界市場\n[鳳]JR阪和線➔[天王寺]", "item": "", "status": "", "jpy": "¥320", "ntd": "NT$67", "note": "", "done": false}, {"id": "i38", "date": "2026/09/22", "weekday": "週二", "time": "11:55", "durH": "3小時", "durM": "0分鐘", "type": "景點", "desc": "逛逛+吃午餐", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "新世界達摩串炸", "done": false}, {"id": "i39", "date": "2026/09/22", "weekday": "週二", "time": "14:55", "durH": "0小時", "durM": "10分鐘", "type": "交通", "desc": "前往日本橋電器街（步行700m）", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i40", "date": "2026/09/22", "weekday": "週二", "time": "15:05", "durH": "4小時", "durM": "0分鐘", "type": "景點", "desc": "逛逛\nsuper kids land、Animate、駿河屋、jungle", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "https://www.funliday.com/posts/osaka-nipponbashi-electric-streetf/#aioseo-", "done": false}, {"id": "i41", "date": "2026/09/22", "weekday": "週二", "time": "19:05", "durH": "0小時", "durM": "5分鐘", "type": "交通", "desc": "前往おにぎりがスキすぎて日本橋店（步行100m）", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i42", "date": "2026/09/22", "weekday": "週二", "time": "19:10", "durH": "1小時", "durM": "0分鐘", "type": "吃飯", "desc": "吃晚餐（おにぎりがスキすぎて日本橋店）", "item": "餐廳預約", "status": "無", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i43", "date": "2026/09/22", "weekday": "週二", "time": "20:10", "durH": "0小時", "durM": "30分鐘", "type": "交通", "desc": "走回飯店(約1.4km)&買超商", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i44", "date": "2026/09/22", "weekday": "週二", "time": "20:40", "durH": "～休息", "durM": "", "type": "飯店", "desc": "休息嚕", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i45", "date": "2026/09/23", "weekday": "週三", "time": "08:00", "durH": "1小時", "durM": "0分鐘", "type": "飯店", "desc": "起床+梳洗+準備出門", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i46", "date": "2026/09/23", "weekday": "週三", "time": "09:00", "durH": "1小時", "durM": "15分鐘", "type": "吃飯", "desc": "出門+吃早餐（）", "item": "", "status": "", "jpy": "", "ntd": "", "note": "", "done": false}, {"id": "i47", "date": "2026/09/23", "weekday": "週三", "time": "10:15", "durH": "0小時", "durM": "50分鐘", "type": "交通", "desc": "前往奈良公園\n[大阪難波]日本近鐵➔[近鐵奈良]", "item": "", "status": "", "jpy": "¥680", "ntd": "NT$143", "note": "", "done": false}, {"id": "i48", "date": "2026/09/23", "weekday": "週三", "time": "11:05", "durH": "3小時", "durM": "0分鐘", "type": "景點", "desc": "逛逛\n搭公車到春日大社+奈良公園+東大寺+大佛布丁", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "搭乘2、6、72、160號公車至「大佛殿春日大社前」下車後步行4分鐘\nhttps://nicklee.tw/705/nara-kotsu-bus/", "done": false}, {"id": "i49", "date": "2026/09/23", "weekday": "週三", "time": "14:05", "durH": "2小時", "durM": "0分鐘", "type": "吃飯", "desc": "吃午餐(志津香 公園店)\n排超過半小時就換其他家(牛まぶし三山/ならや 東大寺店）", "item": "餐廳預約", "status": "無", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i50", "date": "2026/09/23", "weekday": "週三", "time": "16:05", "durH": "0小時", "durM": "15分鐘", "type": "交通", "desc": "前往東向商店街（走路900m）", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i51", "date": "2026/09/23", "weekday": "週三", "time": "16:20", "durH": "2小時", "durM": "0分鐘", "type": "景點", "desc": "逛逛（東向商店街）", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "中谷堂よもぎ餅麻糬、柿の葉すし", "done": false}, {"id": "i52", "date": "2026/09/23", "weekday": "週三", "time": "18:20", "durH": "0小時", "durM": "50分鐘", "type": "交通", "desc": "回道頓堀\n[近鐵奈良]日本近鐵➔[近鐵日本橋]", "item": "", "status": "", "jpy": "¥680", "ntd": "NT$143", "note": "", "done": false}, {"id": "i53", "date": "2026/09/23", "weekday": "週三", "time": "19:10", "durH": "1小時", "durM": "20分鐘", "type": "景點", "desc": "逛逛道頓堀", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i54", "date": "2026/09/23", "weekday": "週三", "time": "20:30", "durH": "2小時", "durM": "0分鐘", "type": "吃飯", "desc": "吃晚餐\n新宿焼肉 牛たんの檸檬 大阪本店", "item": "餐廳訂位", "status": "已預約/購買", "jpy": "", "ntd": "NT$0", "note": "Tabelog(有mail) 預約到20:30 未到每人會收取¥5500", "done": false}, {"id": "i55", "date": "2026/09/23", "weekday": "週三", "time": "22:30", "durH": "～休息", "durM": "", "type": "飯店", "desc": "飯店休息&看附近想逛啥也OK", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i56", "date": "2026/09/24", "weekday": "週四", "time": "07:00", "durH": "1小時", "durM": "15分鐘", "type": "飯店", "desc": "起床+梳洗+準備出門", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i57", "date": "2026/09/24", "weekday": "週四", "time": "08:15", "durH": "1小時", "durM": "0分鐘", "type": "吃飯", "desc": "吃早餐（）", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i58", "date": "2026/09/24", "weekday": "週四", "time": "09:15", "durH": "1小時", "durM": "30分鐘", "type": "交通", "desc": "前往神戶動物王國\n[大阪難波]阪神難波➔[神戶三宮]➔[三宮]新交通港灣人工島線➔[神戶動物王國]", "item": "阪神門票套票", "status": "現場購買", "jpy": "¥3,000", "ntd": "NT$630", "note": "套票購買處：大阪難波車站（東特急券販售處）\n*只能現金購票", "done": false}, {"id": "i59", "date": "2026/09/24", "weekday": "週四", "time": "10:45", "durH": "3小時", "durM": "0分鐘", "type": "景點", "desc": "逛逛（神戶動物王國）", "item": "", "status": "無", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i60", "date": "2026/09/24", "weekday": "週四", "time": "13:45", "durH": "0小時", "durM": "20分鐘", "type": "交通", "desc": "前往三宮站\n[神戶動物王國]新交通港灣人工島線➔[三宮]", "item": "", "status": "", "jpy": "¥290", "ntd": "NT$61", "note": "", "done": false}, {"id": "i61", "date": "2026/09/24", "weekday": "週四", "time": "14:05", "durH": "2小時", "durM": "0分鐘", "type": "吃飯", "desc": "吃午餐（WAGYUの国）", "item": "餐廳預約", "status": "已預約/購買", "jpy": "", "ntd": "NT$0", "note": "Google reserve(有寄gmail) 14:00 兩位", "done": false}, {"id": "i62", "date": "2026/09/24", "weekday": "週四", "time": "16:05", "durH": "4小時", "durM": "0分鐘", "type": "景點", "desc": "逛逛（神戶三宮中心街+Center Plaza&West+San Plaza）", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "指南針&駿河屋&扭蛋店&#C-pla 等等(看儲存", "done": false}, {"id": "i63", "date": "2026/09/24", "weekday": "週四", "time": "20:05", "durH": "1小時", "durM": "10分鐘", "type": "交通", "desc": "回飯店\n[神戶三宮]阪神本線➔[大阪難波]", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i64", "date": "2026/09/24", "weekday": "週四", "time": "21:15", "durH": "～休息", "durM": "", "type": "飯店", "desc": "飯店休息&看附近想逛啥也OK", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i65", "date": "2026/09/25", "weekday": "週五", "time": "07:00", "durH": "1小時", "durM": "0分鐘", "type": "飯店", "desc": "起床+梳洗+準備出門", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i66", "date": "2026/09/25", "weekday": "週五", "time": "08:00", "durH": "0小時", "durM": "30分鐘", "type": "交通", "desc": "前往環球影城\n[大阪難波]阪神電鐵➔[西九條]➔[西九條]JR夢咲線➔[環球城]", "item": "", "status": "", "jpy": "¥400", "ntd": "NT$84", "note": "", "done": false}, {"id": "i67", "date": "2026/09/25", "weekday": "週五", "time": "08:30", "durH": "10小時", "durM": "0分鐘", "type": "景點", "desc": "玩一整天環球\n電子號碼券：\n芙莉蓮追憶之旅", "item": "門票+快速通關", "status": "已預約/購買", "jpy": "", "ntd": "NT$0", "note": "兩個月前可購買（7/24）", "done": false}, {"id": "i68", "date": "2026/09/26", "weekday": "週六", "time": "08:30", "durH": "1小時", "durM": "30分鐘", "type": "飯店", "desc": "起床+梳洗+整理行李+退房", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i69", "date": "2026/09/26", "weekday": "週六", "time": "10:00", "durH": "1小時", "durM": "0分鐘", "type": "交通", "desc": "前往臨空城Outlet（南海電鐵／叫車）", "item": "", "status": "", "jpy": "¥1,520", "ntd": "NT$319", "note": "", "done": false}, {"id": "i70", "date": "2026/09/26", "weekday": "週六", "time": "11:00", "durH": "3小時", "durM": "30分鐘", "type": "景點", "desc": "逛逛+吃早午餐", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i71", "date": "2026/09/26", "weekday": "週六", "time": "14:30", "durH": "0小時", "durM": "10分鐘", "type": "交通", "desc": "前往關西國際機場（南海電鐵）", "item": "", "status": "", "jpy": "¥370", "ntd": "NT$78", "note": "", "done": false}, {"id": "i72", "date": "2026/09/26", "weekday": "週六", "time": "14:40", "durH": "1小時", "durM": "35分鐘", "type": "交通", "desc": "等待飛機", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i73", "date": "2026/09/26", "weekday": "週六", "time": "16:15", "durH": "2小時", "durM": "0分鐘", "type": "交通", "desc": "KIX➔TPE", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i74", "date": "2026/09/26", "weekday": "週六", "time": "18:15", "durH": "0小時", "durM": "45分鐘", "type": "交通", "desc": "抵達桃園國際機場（TPE）", "item": "", "status": "", "jpy": "", "ntd": "NT$0", "note": "", "done": false}, {"id": "i75", "date": "2026/09/26", "weekday": "週六", "time": "19:00", "durH": "1小時", "durM": "0分鐘", "type": "交通", "desc": "桃機➔家裡（機場接送）", "item": "機場接送", "status": "已預約/購買", "jpy": "", "ntd": "NT$547", "note": "$1094", "done": false}];
+const SEED_SHOP = [{"id": "s1", "who": "火鍋", "name": "大鳥大社透明御守", "variant": "藍色(?)", "qty": "1", "unitNtd": "$297", "unitJpy": "¥1,503", "totalNtd": "$297", "totalJpy": "¥1,503", "channel": "其他（寫備註）", "note": "D5大鳥大社", "bought": false}, {"id": "s2", "who": "火鍋", "name": "ELIXIR平衡保濕水凝霜", "variant": "", "qty": "1", "unitNtd": "$490", "unitJpy": "¥2,479", "totalNtd": "$490", "totalJpy": "¥2,479", "channel": "唐吉訶德, @cosme, 松本清", "note": "", "bought": false}, {"id": "s3", "who": "火鍋", "name": "ELIXIR 水油平衡晚安面膜", "variant": "", "qty": "1", "unitNtd": "$490", "unitJpy": "¥2,479", "totalNtd": "$490", "totalJpy": "¥2,479", "channel": "唐吉訶德, @cosme, 松本清", "note": "", "bought": false}, {"id": "s4", "who": "火鍋", "name": "日清冷麵(泡菜/雞鹽檸檬皆可)", "variant": "", "qty": "4", "unitNtd": "$130", "unitJpy": "¥658", "totalNtd": "$520", "totalJpy": "¥2,631", "channel": "", "note": "阿瑋說都可以", "bought": false}, {"id": "s5", "who": "火鍋", "name": "7-11 關東煮湯包(盒裝)(秋冬限定)", "variant": "", "qty": "3", "unitNtd": "$25", "unitJpy": "¥110", "totalNtd": "$75", "totalJpy": "¥330", "channel": "其他（寫備註）", "note": "7-11", "bought": false}, {"id": "s6", "who": "火鍋", "name": "7-11 海鮮春 雨春雨ヌードル　シーフード味", "variant": "", "qty": "2", "unitNtd": "$45", "unitJpy": "¥204", "totalNtd": "$90", "totalJpy": "¥408", "channel": "其他（寫備註）", "note": "7-11", "bought": false}, {"id": "s7", "who": "火鍋", "name": "7-11 蛋花湯(五入一袋) たまごスープ 5個入", "variant": "", "qty": "1", "unitNtd": "$70", "unitJpy": "¥343", "totalNtd": "$70", "totalJpy": "¥343", "channel": "其他（寫備註）", "note": "7-11", "bought": false}, {"id": "s8", "who": "火鍋", "name": "曼秀雷敦AD止癢乳膏 145g", "variant": "", "qty": "1", "unitNtd": "$400", "unitJpy": "¥1,925", "totalNtd": "$400", "totalJpy": "¥1,925", "channel": "唐吉訶德, @cosme, 松本清", "note": "", "bought": false}, {"id": "s9", "who": "我", "name": "Biore角栓崩壞洗面乳", "variant": "黃瓶", "qty": "2", "unitNtd": "$170", "unitJpy": "¥860", "totalNtd": "$340", "totalJpy": "¥1,720", "channel": "唐吉訶德, 松本清", "note": "", "bought": false}, {"id": "s10", "who": "我", "name": "Biore角栓崩壞洗面乳（補充包）", "variant": "黃瓶", "qty": "2", "unitNtd": "$200", "unitJpy": "¥1,012", "totalNtd": "$400", "totalJpy": "¥2,024", "channel": "唐吉訶德, 松本清", "note": "", "bought": false}, {"id": "s11", "who": "我", "name": "RosyRosa厚粉撲", "variant": "", "qty": "2", "unitNtd": "$115", "unitJpy": "¥582", "totalNtd": "$230", "totalJpy": "¥1,164", "channel": "唐吉訶德, @cosme", "note": "", "bought": false}, {"id": "s12", "who": "我", "name": "金喚羽凝脂400g", "variant": "", "qty": "2", "unitNtd": "$1,050", "unitJpy": "¥5,313", "totalNtd": "$2,100", "totalJpy": "¥10,626", "channel": "唐吉訶德", "note": "", "bought": false}, {"id": "s13", "who": "我", "name": "輕喚羽淨露400ml", "variant": "", "qty": "1", "unitNtd": "$700", "unitJpy": "¥3,542", "totalNtd": "$700", "totalJpy": "¥3,542", "channel": "唐吉訶德", "note": "", "bought": false}, {"id": "s14", "who": "我", "name": "Wakamoto", "variant": "", "qty": "", "unitNtd": "", "unitJpy": "¥0", "totalNtd": "$0", "totalJpy": "¥0", "channel": "", "note": "", "bought": false}, {"id": "s15", "who": "我", "name": "蕁麻疹藥膏", "variant": "", "qty": "", "unitNtd": "", "unitJpy": "¥0", "totalNtd": "$0", "totalJpy": "¥0", "channel": "", "note": "", "bought": false}, {"id": "s16", "who": "我", "name": "TSURURI毛孔污垢分解凝膠", "variant": "", "qty": "", "unitNtd": "", "unitJpy": "¥0", "totalNtd": "$0", "totalJpy": "¥0", "channel": "", "note": "", "bought": false}, {"id": "s17", "who": "我", "name": "肌肉痠痛", "variant": "", "qty": "", "unitNtd": "", "unitJpy": "¥0", "totalNtd": "$0", "totalJpy": "¥0", "channel": "", "note": "", "bought": false}, {"id": "s18", "who": "我", "name": "肌膚之鑰\nVOILE CRÈME CORRECTEUR N 光采無瑕妝前凝霜", "variant": "", "qty": "", "unitNtd": "$1,300", "unitJpy": "¥6,578", "totalNtd": "$0", "totalJpy": "¥0", "channel": "", "note": "", "bought": false}, {"id": "s19", "who": "我", "name": "蘭蔻粉底液", "variant": "", "qty": "", "unitNtd": "", "unitJpy": "¥0", "totalNtd": "$0", "totalJpy": "¥0", "channel": "", "note": "", "bought": false}, {"id": "s20", "who": "我", "name": "防曬乳", "variant": "", "qty": "", "unitNtd": "", "unitJpy": "¥0", "totalNtd": "$0", "totalJpy": "¥0", "channel": "唐吉訶德", "note": "", "bought": true}, {"id": "s21", "who": "我", "name": "興和製藥 Korgen kowa 鼻炎口含速融片α 18片入(Avril)", "variant": "", "qty": "1", "unitNtd": "", "unitJpy": "¥0", "totalNtd": "$0", "totalJpy": "¥0", "channel": "", "note": "", "bought": true}, {"id": "s22", "who": "我", "name": "高密度除塵刷", "variant": "", "qty": "2", "unitNtd": "", "unitJpy": "¥0", "totalNtd": "$0", "totalJpy": "¥0", "channel": "", "note": "", "bought": true}, {"id": "s23", "who": "阿殤", "name": "Biore角栓崩壞洗面乳", "variant": "綠", "qty": "1", "unitNtd": "$200", "unitJpy": "¥1,012", "totalNtd": "$200", "totalJpy": "¥1,012", "channel": "唐吉訶德, 松本清", "note": "", "bought": false}, {"id": "s24", "who": "阿殤", "name": "大鳥大社透明御守", "variant": "白色", "qty": "1", "unitNtd": "$297", "unitJpy": "¥1,503", "totalNtd": "$297", "totalJpy": "¥1,503", "channel": "其他（寫備註）", "note": "D5大鳥大社", "bought": false}];
+
+const TRIP_START = new Date(2026,8,19); // month 0-indexed: 8 = Sept
+const TRIP_END   = new Date(2026,8,26);
+
+/* ============ state ============ */
+let prepItems = [];
+let luggageItems = [];
+let itinItems = [];
+let shopItems = [];
+let shopImages = {}; // id -> dataURL
+let exchangeRate = DEFAULT_RATE;
+let currentTab = 'prep';
+let currentDayIndex = 0;
+let currentWhoFilter = '全部';
+let currentChannelFilter = '全部';
+let activeImageTarget = null;
+let uidCounter = 1000;
+
+function newId(prefix){ uidCounter++; return prefix + Date.now().toString(36) + uidCounter.toString(36); }
+
+/* ============ custom modal (confirm/prompt replacement) ============
+   Artifact previews often run in a sandboxed iframe that silently blocks
+   native confirm()/prompt() dialogs, so we roll our own tiny modal instead. */
+function showModal({message, withInput=false, defaultValue='', placeholder='', okLabel='確定'}){
+  return new Promise(resolve=>{
+    const overlay = document.getElementById('modalOverlay');
+    const msgEl = document.getElementById('modalMsg');
+    const inputEl = document.getElementById('modalInput');
+    const okBtn = document.getElementById('modalOk');
+    const cancelBtn = document.getElementById('modalCancel');
+
+    msgEl.textContent = message;
+    okBtn.textContent = okLabel;
+    if(withInput){
+      inputEl.classList.add('show');
+      inputEl.value = defaultValue;
+      inputEl.placeholder = placeholder;
+    } else {
+      inputEl.classList.remove('show');
+    }
+    overlay.classList.add('show');
+    if(withInput) setTimeout(()=>inputEl.focus(), 30);
+
+    function cleanup(result){
+      overlay.classList.remove('show');
+      okBtn.onclick = null; cancelBtn.onclick = null; overlay.onclick = null;
+      inputEl.onkeydown = null;
+      resolve(result);
+    }
+    okBtn.onclick = ()=> cleanup(withInput ? (inputEl.value || null) : true);
+    cancelBtn.onclick = ()=> cleanup(withInput ? null : false);
+    overlay.onclick = (e)=>{ if(e.target === overlay) cleanup(withInput ? null : false); };
+    inputEl.onkeydown = (e)=>{
+      if(e.key === 'Enter'){ e.preventDefault(); cleanup(inputEl.value || null); }
+      if(e.key === 'Escape'){ e.preventDefault(); cleanup(null); }
+    };
+  });
+}
+function showConfirm(message){
+  return showModal({message, withInput:false, okLabel:'刪除'});
+}
+function showPrompt(message, placeholder=''){
+  return showModal({message, withInput:true, placeholder, okLabel:'新增'});
+}
+
+/* ============ storage helpers (Firestore 版) ============ */
+/* 若連線失敗，會顯示提示訊息，畫面仍可繼續編輯，但變更暫時不會保存。 */
+let storageDisabled = false;
+function storageOk(){
+  return !storageDisabled;
+}
+function notifyStorageDisabled(){
+  if(document.getElementById('storageBanner')) return;
+  const b = document.createElement('div');
+  b.id = 'storageBanner';
+  b.className = 'storage-banner';
+  b.textContent = '⚠️ 目前無法連線到雲端資料庫，畫面仍可繼續編輯，但這次的變更可能不會保存。請檢查網路後重新整理頁面。';
+  document.body.insertBefore(b, document.body.firstChild.nextSibling);
+}
+
+/* 底層：對 Firestore 的 get / set / delete，每個 key 對應一份文件
+   加上逾時保護：Firestore 若超過 20 秒沒回應（例如網路被防火牆擋住），
+   就主動放棄、丟出錯誤，好讓上層可以改用預設資料繼續顯示畫面，
+   而不會讓整個網頁一直卡在空白畫面。所有請求都是平行發出，不用排隊等待。 */
+function withTimeout(promise, ms, label){
+  return Promise.race([
+    promise,
+    new Promise((_, reject)=> setTimeout(()=> reject(new Error('逾時：'+label+'（'+ms+'ms 內未回應）')), ms))
+  ]);
+}
+async function fsGet(key){
+  console.log('[雲端] 讀取', key, '...');
+  const snap = await withTimeout(getDoc(doc(db, DATA_COLLECTION, key)), 20000, 'get '+key);
+  console.log('[雲端] 讀取完成', key, snap.exists() ? '(有資料)' : '(沒有資料)');
+  return snap.exists() ? snap.data() : null;
+}
+function fsSet(key, value){
+  return withTimeout(setDoc(doc(db, DATA_COLLECTION, key), { value, updatedAt: Date.now() }), 20000, 'set '+key);
+}
+function fsDelete(key){
+  return withTimeout(deleteDoc(doc(db, DATA_COLLECTION, key)), 20000, 'delete '+key);
+}
+
+async function loadKey(key, seed){
+  if(!storageOk()) return JSON.parse(JSON.stringify(seed));
+  try{
+    const r = await fsGet(key);
+    if(r && r.value) return JSON.parse(r.value);
+    throw new Error('empty');
+  }catch(e){
+    try{ await fsSet(key, JSON.stringify(seed)); }catch(e2){ /* ignore, use seed in-memory */ }
+    return JSON.parse(JSON.stringify(seed));
+  }
+}
+function saveKey(key, val){
+  if(!storageOk()) return;
+  fsSet(key, JSON.stringify(val)).catch(err=>{ console.error('save fail', key, err); notifyStorageDisabled(); });
+}
+function deleteKey(key){
+  if(!storageOk()) return;
+  fsDelete(key).catch(()=>{});
+}
+function saveRaw(key, rawVal){
+  if(!storageOk()) return;
+  fsSet(key, rawVal).catch(err=>{ console.error('save fail', key, err); notifyStorageDisabled(); });
+}
+const saveDebounced = (()=>{
+  let timers = {};
+  return (key, getVal)=>{
+    clearTimeout(timers[key]);
+    timers[key] = setTimeout(()=> saveKey(key, getVal()), 450);
+  };
+})();
+
+async function loadImage(id){
+  if(!storageOk()) return;
+  try{
+    const r = await fsGet('img:'+id);
+    if(r && r.value) shopImages[id] = r.value;
+  }catch(e){ /* no image */ }
+}
+
+/* ============ init ============ */
+async function init(){
+  console.log('[初始化] 開始載入資料...');
+  try{
+    prepItems = await loadKey('prepItems', SEED_PREP);
+    prepItems.forEach(migratePrepItem);
+    const beforeLen = prepItems.length;
+    prepItems = prepItems.filter(p => p.cat !== '行李準備');
+    if(prepItems.length !== beforeLen) saveKey('prepItems', prepItems);
+    luggageItems = await loadKey('luggageItems', SEED_LUGGAGE);
+    itinItems = await loadKey('itinItems', SEED_ITIN);
+    channelOptions = await loadKey('channelOptions', DEFAULT_CHANNELS);
+    shopItems = await loadKey('shopItems', SEED_SHOP);
+    shopItems.forEach(migrateShopItem);
+    exchangeRate = await loadKey('exchangeRate', DEFAULT_RATE);
+    await Promise.all(shopItems.map(s => loadImage(s.id)));
+    console.log('[初始化] 資料載入完成');
+  }catch(err){
+    // never leave the page blank: fall back to seed data in-memory if loading failed
+    console.error('[初始化] 資料載入失敗，改用預設資料顯示畫面：', err);
+    if(!Array.isArray(prepItems) || !prepItems.length){
+      prepItems = JSON.parse(JSON.stringify(SEED_PREP));
+      prepItems.forEach(migratePrepItem);
+      prepItems = prepItems.filter(p => p.cat !== '行李準備');
+    }
+    if(!Array.isArray(luggageItems) || !luggageItems.length) luggageItems = JSON.parse(JSON.stringify(SEED_LUGGAGE));
+    if(!Array.isArray(itinItems) || !itinItems.length) itinItems = JSON.parse(JSON.stringify(SEED_ITIN));
+    if(!Array.isArray(shopItems) || !shopItems.length) shopItems = JSON.parse(JSON.stringify(SEED_SHOP));
+    shopItems.forEach(migrateShopItem);
+    if(!exchangeRate) exchangeRate = DEFAULT_RATE;
+  } finally {
+    try{
+      // default day: first day >= today, else 0
+      const today = new Date(); today.setHours(0,0,0,0);
+      const days = uniqueDays();
+      let idx = days.findIndex(d => dayToDate(d) >= today);
+      currentDayIndex = idx === -1 ? days.length - 1 : idx;
+
+      renderCountdown();
+      setInterval(renderCountdown, 60*1000);
+      bindTabbar();
+      bindGlobalPaste();
+      bindImageViewer();
+      render();
+      console.log('[初始化] 畫面渲染完成');
+    }catch(renderErr){
+      console.error('[初始化] 渲染畫面時發生錯誤：', renderErr);
+    }
+  }
+}
+init();
+
+/* ============ utils ============ */
+function dayToDate(d){ // "2026/09/19" -> Date
+  const [y,m,day] = d.split('/').map(Number);
+  return new Date(y, m-1, day);
+}
+function uniqueDays(){
+  const seen = []; const set = new Set();
+  itinItems.forEach(i=>{ if(!set.has(i.date)){ set.add(i.date); seen.push(i.date);} });
+  return seen;
+}
+const DEFAULT_CHANNELS = ['唐吉訶德','@cosme','大國藥妝','松本清','OS DRUG'];
+let channelOptions = DEFAULT_CHANNELS.slice();
+const QTY_MAX = 10;
+function addChannelOption(name){
+  const n = String(name || '').trim();
+  if(!n) return null;
+  if(!channelOptions.includes(n)){ channelOptions.push(n); saveKey('channelOptions', channelOptions); }
+  return n;
+}
+function migrateShopItem(s){
+  if(!Array.isArray(s.channels)){
+    const raw = (s.channel || '').split(/[,，]/).map(x=>x.trim()).filter(Boolean);
+    s.channels = raw.filter(x => x && x.indexOf('其他') === -1);
+    s.channelOther = raw.some(x => x.includes('其他'));
+    if(s.channelOtherText === undefined) s.channelOtherText = '';
+    delete s.channel;
+  }
+  s.channels.forEach(c => { if(c && !channelOptions.includes(c)) channelOptions.push(c); });
+  if(s.currency === undefined || s.unitPrice === undefined){
+    const q = Math.max(1, Math.round(parseAmount(s.qty)) || 1);
+    const uJpy = parseAmount(s.unitJpy), uNtd = parseAmount(s.unitNtd);
+    const tJpy = parseAmount(s.totalJpy), tNtd = parseAmount(s.totalNtd);
+    if(uJpy > 0){ s.currency = 'jpy'; s.unitPrice = String(uJpy); }
+    else if(uNtd > 0){ s.currency = 'ntd'; s.unitPrice = String(uNtd); }
+    else if(tJpy > 0){ s.currency = 'jpy'; s.unitPrice = String(Math.round(tJpy / q)); }
+    else if(tNtd > 0){ s.currency = 'ntd'; s.unitPrice = String(Math.round(tNtd / q)); }
+    else { s.currency = 'jpy'; s.unitPrice = ''; }
+    s.qty = String(q);
+    delete s.unitNtd; delete s.unitJpy; delete s.totalNtd; delete s.totalJpy;
+  }
+}
+function shopQty(s){ const n = Math.round(parseAmount(s.qty)); return n > 0 ? n : 1; }
+function shopUnit(s){ return parseAmount(s.unitPrice); }
+function shopTotals(s){
+  const t = shopUnit(s) * shopQty(s);
+  if(s.currency === 'jpy') return {jpy:t, ntd:t * exchangeRate};
+  return {ntd:t, jpy: exchangeRate > 0 ? t / exchangeRate : 0};
+}
+function curSym(c){ return c === 'jpy' ? '¥' : 'NT$'; }
+function qtyOptionsHtml(s){
+  const q = shopQty(s); let out = '';
+  for(let i = 1; i <= QTY_MAX; i++) out += '<option value="' + i + '"' + (i === q ? ' selected' : '') + '>' + i + '</option>';
+  if(q > QTY_MAX) out += '<option value="' + q + '" selected>' + q + '</option>';
+  return out + '<option value="__custom">自訂…</option>';
+}
+function itemMatchesChannelG(s){
+  if(currentChannelFilter === '全部') return true;
+  if(currentChannelFilter === '其他') return !!s.channelOther;
+  return (s.channels || []).includes(currentChannelFilter);
+}
+function subtotalHtml(s){
+  const t = shopTotals(s);
+  const main = s.currency === 'jpy' ? fmtJPY(t.jpy) : fmtNTD(t.ntd);
+  const alt  = s.currency === 'jpy' ? fmtNTD(t.ntd) : fmtJPY(t.jpy);
+  return '<span class="sum-main">' + main + '</span><span class="sum-alt">(' + alt + ')</span>';
+}
+function sumPair(items){
+  return items.reduce((a, it) => { const t = shopTotals(it); return {ntd:a.ntd + t.ntd, jpy:a.jpy + t.jpy}; }, {ntd:0, jpy:0});
+}
+function refreshShopTotals(){
+  const view = document.getElementById('view');
+  if(!view) return;
+  view.querySelectorAll('[data-subtotal]').forEach(el => {
+    const it = shopItems.find(s => s.id === el.dataset.subtotal);
+    if(it) el.innerHTML = subtotalHtml(it);
+  });
+  view.querySelectorAll('[data-groupsub]').forEach(el => {
+    const who = el.dataset.groupsub;
+    const items = shopItems.filter(s => s.who === who && itemMatchesChannelG(s));
+    const t = sumPair(items);
+    el.textContent = items.length + ' 項・' + fmtNTD(t.ntd) + ' ／ ' + fmtJPY(t.jpy);
+  });
+  const g = view.querySelector('[data-grandtotal]');
+  if(g){
+    const items = shopItems.filter(s => (currentWhoFilter === '全部' || s.who === currentWhoFilter) && itemMatchesChannelG(s));
+    const t = sumPair(items);
+    g.innerHTML = '<b>' + fmtNTD(t.ntd) + '</b> ／ ' + fmtJPY(t.jpy);
+  }
+}
+function migratePrepItem(p){
+  if(p.amount === undefined){
+    const jpyN = parseAmount(p.jpy);
+    const ntdN = parseAmount(p.ntd);
+    if(jpyN > 0){ p.currency = 'jpy'; p.amount = String(jpyN); }
+    else { p.currency = 'ntd'; p.amount = String(ntdN); }
+    delete p.jpy; delete p.ntd;
+  }
+  if(!p.currency) p.currency = 'ntd';
+}
+function prepItemNtd(p){
+  const n = parseAmount(p.amount);
+  return p.currency === 'jpy' ? n * exchangeRate : n;
+}
+function parseAmount(str){
+  if(!str) return 0;
+  const m = String(str).replace(/,/g,'').match(/-?\d+(\.\d+)?/);
+  return m ? parseFloat(m[0]) : 0;
+}
+function fmtNTD(n){ return 'NT$' + Math.round(n).toLocaleString('en-US'); }
+function fmtJPY(n){ return '¥' + Math.round(n).toLocaleString('en-US'); }
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function autoGrow(el){
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function renderCountdown(){
+  const el = document.getElementById('countdown');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const msPerDay = 86400000;
+  if(today < TRIP_START){
+    const d = Math.round((TRIP_START - today)/msPerDay);
+    el.innerHTML = `距離出發還有 <b>${d}</b> 天`;
+  } else if(today <= TRIP_END){
+    const d = Math.round((today - TRIP_START)/msPerDay) + 1;
+    el.innerHTML = `旅程 第 <b>${d}</b> / 8 天`;
+  } else {
+    el.innerHTML = `旅程已結束 🎐`;
+  }
+}
+
+/* ============ tab bar ============ */
+function bindTabbar(){
+  document.querySelectorAll('.tabbar button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      currentTab = btn.dataset.tab;
+      document.querySelectorAll('.tabbar button').forEach(b=>b.classList.toggle('active', b===btn));
+      document.getElementById('daychips').style.display = currentTab === 'itin' ? 'flex' : 'none';
+      const titles = {prep:'行前準備', luggage:'行李準備', itin:'詳細行程', shop:'代購清單'};
+      document.getElementById('pageTitle').textContent = titles[currentTab];
+      window.scrollTo({top:0});
+      render();
+    });
+  });
+}
+
+/* ============ master render ============ */
+function render(){
+  if(currentTab === 'prep') renderPrep();
+  else if(currentTab === 'luggage') renderLuggage();
+  else if(currentTab === 'itin') renderItin();
+  else renderShop();
+}
+
+/* ================================================================
+   PREP TAB
+================================================================= */
+function prepTotal(){
+  return prepItems.reduce((sum,p)=> sum + prepItemNtd(p), 0);
+}
+function renderPrep(){
+  const view = document.getElementById('view');
+  const cats = [];
+  prepItems.forEach(p=>{ if(!cats.includes(p.cat)) cats.push(p.cat); });
+
+  let html = `<div class="rate-bar">
+    <span>💱 匯率設定</span>
+    <span>¥1 JPY = <input id="rateInput" type="number" step="0.001" min="0" value="${exchangeRate}"> NT$ 台幣</span>
+  </div>`;
+  html += `<div class="total-bar" style="position:static; margin-bottom:16px;">
+    <span>行前準備預估總花費</span><span><b>${fmtNTD(prepTotal())}</b></span>
+  </div>`;
+
+  cats.forEach(cat=>{
+    const items = prepItems.filter(p=>p.cat===cat);
+    html += `<div class="section-title">${escapeHtml(cat)}<span class="sum">${items.length} 項</span></div>`;
+    items.forEach(p=> html += prepCardHtml(p));
+    html += `<button class="add-btn" data-addcat="${escapeHtml(cat)}">＋ 新增「${escapeHtml(cat)}」項目</button>`;
+  });
+  html += `<button class="add-btn" id="addPrepCat" style="margin-top:18px;">＋ 新增分類</button>`;
+  view.innerHTML = html;
+
+  document.getElementById('rateInput').addEventListener('input', (e)=>{
+    exchangeRate = parseFloat(e.target.value) || 0;
+    saveDebounced('exchangeRate', ()=>exchangeRate);
+  });
+  document.getElementById('rateInput').addEventListener('blur', ()=>{
+    saveKey('exchangeRate', exchangeRate);
+    renderPrep();
+  });
+
+  view.querySelectorAll('[data-addcat]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      prepItems.push({id:newId('p'), cat:b.dataset.addcat, name:'新項目', amount:'', currency:'ntd', link:'', note:'', status:'待處理', remark:''});
+      saveKey('prepItems', prepItems);
+      renderPrep();
+    });
+  });
+  document.getElementById('addPrepCat').addEventListener('click', async ()=>{
+    const name = await showPrompt('新分類名稱：', '例如：文件備份');
+    if(!name) return;
+    prepItems.push({id:newId('p'), cat:name, name:'新項目', amount:'', currency:'ntd', link:'', note:'', status:'待處理', remark:''});
+    saveKey('prepItems', prepItems);
+    renderPrep();
+  });
+
+  bindPrepCardEvents(view);
+}
+
+const PREP_STATUS_OPTIONS = ['待處理','處理中','處理完成'];
+function prepCardHtml(p){
+  return `
+  <div class="card" data-id="${p.id}">
+    <div class="prep-top">
+      <span class="status-tag status-${escapeHtml(p.status)}">[<select class="status-select-inline" data-field="status">
+        ${PREP_STATUS_OPTIONS.map(s=>`<option value="${s}" ${s===p.status?'selected':''}>${s}</option>`).join('')}
+      </select>]</span>
+      <input class="prep-name" data-field="name" value="${escapeHtml(p.name)}" placeholder="項目名稱">
+    </div>
+    <div class="prep-meta-row">
+      <input class="amt-input" data-field="amount" value="${escapeHtml(p.amount)}" placeholder="金額" inputmode="decimal">
+      <select class="curr-select" data-field="currency">
+        <option value="ntd" ${p.currency==='ntd'?'selected':''}>NT$ 台幣</option>
+        <option value="jpy" ${p.currency==='jpy'?'selected':''}>¥ 日幣</option>
+      </select>
+      ${p.currency==='jpy' ? `<span class="converted">≈ ${fmtNTD(prepItemNtd(p))}</span>` : ''}
+    </div>
+    <div class="field-label">說明</div>
+    <textarea class="txt-area" data-field="note" rows="1" placeholder="說明">${escapeHtml(p.note)}</textarea>
+    <div class="field-label">連結</div>
+    <input class="txt-input" data-field="link" value="${escapeHtml(p.link)}" placeholder="貼上網址（可留空）">
+    ${p.link ? `<a class="link-chip" href="${escapeHtml(p.link)}" target="_blank" rel="noopener">🔗 開啟連結</a>` : ''}
+    <div class="field-label">備註</div>
+    <input class="txt-input" data-field="remark" value="${escapeHtml(p.remark)}" placeholder="備註">
+    <div class="row-actions"><button class="icon-btn" data-del>🗑 刪除</button></div>
+  </div>`;
+}
+
+function bindPrepCardEvents(scope){
+  scope.querySelectorAll('.card').forEach(card=>{
+    const id = card.dataset.id;
+    const item = prepItems.find(p=>p.id===id);
+    if(!item) return;
+
+    card.querySelectorAll('[data-field]').forEach(inp=>{
+      if(inp.tagName === 'TEXTAREA') autoGrow(inp);
+      const evt = (inp.tagName==='SELECT') ? 'change' : 'input';
+      inp.addEventListener(evt, ()=>{
+        item[inp.dataset.field] = inp.value;
+        if(inp.tagName==='TEXTAREA') autoGrow(inp);
+        saveDebounced('prepItems', ()=>prepItems);
+        if(inp.tagName==='SELECT'){ saveKey('prepItems', prepItems); renderPrep(); }
+      });
+      inp.addEventListener('blur', ()=>{ if(inp.dataset.field==='link' || inp.dataset.field==='amount') renderPrep(); });
+    });
+
+    card.querySelector('[data-del]').addEventListener('click', async ()=>{
+      const ok = await showConfirm('確定要刪除這個項目嗎？');
+      if(!ok) return;
+      prepItems = prepItems.filter(p=>p.id!==id);
+      saveKey('prepItems', prepItems);
+      renderPrep();
+    });
+  });
+}
+
+/* ================================================================
+   LUGGAGE TAB
+================================================================= */
+function renderLuggage(){
+  const view = document.getElementById('view');
+  const cats = [];
+  luggageItems.forEach(l=>{ if(!cats.includes(l.cat)) cats.push(l.cat); });
+  const packedCount = luggageItems.filter(l=>l.packed).length;
+
+  let html = `<div class="total-bar" style="position:static; margin-bottom:16px;">
+    <span>打包進度</span><span><b>${packedCount}</b> / ${luggageItems.length} 已收好</span>
+  </div>`;
+
+  cats.forEach(cat=>{
+    const items = luggageItems.filter(l=>l.cat===cat);
+    html += `<div class="section-title">${escapeHtml(cat)}<span class="sum">${items.filter(i=>i.packed).length}/${items.length}</span></div>`;
+    items.forEach(l => html += luggageCardHtml(l));
+    html += `<button class="add-btn" data-addcat="${escapeHtml(cat)}">＋ 新增「${escapeHtml(cat)}」項目</button>`;
+  });
+  html += `<button class="add-btn" id="addLuggageCat" style="margin-top:18px;">＋ 新增分類</button>`;
+  view.innerHTML = html;
+
+  view.querySelectorAll('[data-addcat]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      luggageItems.push({id:newId('l'), cat:b.dataset.addcat, name:'新項目', note:'', packed:false});
+      saveKey('luggageItems', luggageItems);
+      renderLuggage();
+    });
+  });
+  document.getElementById('addLuggageCat').addEventListener('click', async ()=>{
+    const name = await showPrompt('新分類名稱：', '例如：藥品');
+    if(!name) return;
+    luggageItems.push({id:newId('l'), cat:name, name:'新項目', note:'', packed:false});
+    saveKey('luggageItems', luggageItems);
+    renderLuggage();
+  });
+
+  bindLuggageCardEvents(view);
+}
+
+function luggageCardHtml(l){
+  return `
+  <div class="card ${l.packed?'done':''}" data-id="${l.id}" style="display:flex; gap:10px; align-items:flex-start;">
+    <button class="done-toggle ${l.packed?'on':''}" data-togglepacked title="標記已收好" style="margin-top:2px;">✓</button>
+    <div style="flex:1; min-width:0;">
+      <input class="prep-name" data-field="name" value="${escapeHtml(l.name)}" placeholder="項目名稱" style="font-size:14.5px;">
+      <input class="txt-input" data-field="note" value="${escapeHtml(l.note)}" placeholder="備註（選填）" style="margin-top:6px;">
+    </div>
+    <button class="icon-btn" data-del>🗑</button>
+  </div>`;
+}
+
+function bindLuggageCardEvents(scope){
+  scope.querySelectorAll('.card[data-id]').forEach(card=>{
+    const id = card.dataset.id;
+    const item = luggageItems.find(l=>l.id===id);
+    if(!item) return;
+
+    card.querySelectorAll('[data-field]').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        item[inp.dataset.field] = inp.value;
+        saveDebounced('luggageItems', ()=>luggageItems);
+      });
+    });
+
+    const toggle = card.querySelector('[data-togglepacked]');
+    if(toggle) toggle.addEventListener('click', ()=>{
+      item.packed = !item.packed;
+      saveKey('luggageItems', luggageItems);
+      renderLuggage();
+    });
+
+    const del = card.querySelector('[data-del]');
+    if(del) del.addEventListener('click', async ()=>{
+      const ok = await showConfirm('確定要刪除這個項目嗎？');
+      if(!ok) return;
+      luggageItems = luggageItems.filter(l=>l.id!==id);
+      saveKey('luggageItems', luggageItems);
+      renderLuggage();
+    });
+  });
+}
+
+/* ================================================================
+   ITINERARY TAB
+================================================================= */
+const TYPE_OPTIONS = ['交通','景點','飯店','吃飯',''];
+const STATUS_OPTIONS = ['','無','已預約/購買','現場購買','待確認'];
+const HOUR_OPTIONS = ['0小時','1小時','2小時','3小時','4小時','5小時','6小時','7小時','8小時','9小時','10小時','11小時','12小時','～休息'];
+const MIN_OPTIONS = ['0分鐘','5分鐘','10分鐘','15分鐘','20分鐘','25分鐘','30分鐘','35分鐘','40分鐘','45分鐘','50分鐘','55分鐘',''];
+
+/* Curated one-line "today's route" for each real trip day (hand-picked from
+   the actual itinerary content). Any day not listed here — e.g. a new day
+   the person adds later — falls back to auto-extracting spot names from
+   that day's 景點-type items. */
+const DAY_ROUTE_OVERRIDE = {
+  '2026/09/19': ['桃園機場','關西機場','南海電鐵','難波・道頓堀','心齋橋'],
+  '2026/09/20': ['大阪城公園','梅田','焼肉晚餐','心齋橋'],
+  '2026/09/21': ['嵯峨野小火車','嵐山竹林・渡月橋','伏見稻荷大社','京都車站'],
+  '2026/09/22': ['大鳥大社','通天閣・新世界','日本橋電器街'],
+  '2026/09/23': ['奈良公園','東大寺・春日大社','東向商店街','道頓堀'],
+  '2026/09/24': ['神戶動物王國','神戶三宮中心街'],
+  '2026/09/25': ['大阪環球影城 USJ'],
+  '2026/09/26': ['臨空城 Outlet','關西機場'],
+};
+function extractPlaceLabel(desc){
+  if(!desc) return '';
+  let s = desc.split('\n')[0].trim();
+  const paren = s.match(/[（(]([^）)]+)[）)]/);
+  const before = s.split(/[（(]/)[0].trim();
+  // generic filler verbs carry no place info — prefer what's inside the parentheses instead
+  const filler = /^(逛逛|晃晃|走走|吃飯|吃飯\+逛街|買|購物|休息)$/;
+  let label = (filler.test(before) && paren) ? paren[1] : before;
+  label = label.split(/[+＆&、\/／]/)[0].trim();
+  return label;
+}
+function getDayRoute(date){
+  if(DAY_ROUTE_OVERRIDE[date]) return DAY_ROUTE_OVERRIDE[date];
+  const items = itinItems.filter(i=>i.date===date);
+  let spots = items.filter(i=>i.type==='景點').map(i=>extractPlaceLabel(i.desc)).filter(Boolean);
+  if(spots.length === 0){
+    spots = items.filter(i=>i.type && i.type!=='交通' && i.type!=='飯店').map(i=>extractPlaceLabel(i.desc)).filter(Boolean);
+  }
+  const MAX = 6;
+  if(spots.length > MAX){ spots = spots.slice(0, MAX); spots.push('…'); }
+  return spots;
+}
+
+function renderDaychips(){
+  const days = uniqueDays();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const wrap = document.getElementById('daychips');
+  wrap.innerHTML = days.map((d,i)=>{
+    const dt = dayToDate(d);
+    const isToday = dt.getTime() === today.getTime();
+    const label = d.slice(5).replace('/','.');
+    const wd = itinItems.find(it=>it.date===d)?.weekday || '';
+    return `<div class="daychip ${i===currentDayIndex?'active':''} ${isToday?'today':''}" data-day="${i}">
+      <span class="d">${label}</span><span class="wd">${wd}</span>
+    </div>`;
+  }).join('') + `<div class="daychip" data-adddayafter="last" style="border-style:dashed;">＋ 新增一天</div>`;
+
+  wrap.querySelectorAll('[data-day]').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      currentDayIndex = parseInt(chip.dataset.day);
+      renderItin();
+    });
+  });
+  const addDayBtn = wrap.querySelector('[data-adddayafter]');
+  if(addDayBtn){
+    addDayBtn.addEventListener('click', ()=>{
+      const days2 = uniqueDays();
+      const last = dayToDate(days2[days2.length-1]);
+      last.setDate(last.getDate()+1);
+      const y=last.getFullYear(), m=String(last.getMonth()+1).padStart(2,'0'), d=String(last.getDate()).padStart(2,'0');
+      const newDate = `${y}/${m}/${d}`;
+      const wdNames=['週日','週一','週二','週三','週四','週五','週六'];
+      itinItems.push({id:newId('i'), date:newDate, weekday:wdNames[last.getDay()], time:'09:00', durH:'1小時', durM:'0分鐘', type:'', desc:'新行程', item:'', status:'', jpy:'', ntd:'', note:'', done:false});
+      saveKey('itinItems', itinItems);
+      currentDayIndex = uniqueDays().length - 1;
+      renderItin();
+    });
+  }
+}
+
+function dayTotal(date){
+  return itinItems.filter(i=>i.date===date).reduce((s,i)=>s+parseAmount(i.ntd),0);
+}
+
+function renderItin(){
+  document.getElementById('daychips').style.display = 'flex';
+  renderDaychips();
+  const days = uniqueDays();
+  const date = days[currentDayIndex];
+  const view = document.getElementById('view');
+  if(!date){ view.innerHTML = `<p class="empty-note">尚無行程，點上方「＋ 新增一天」開始規劃吧！</p>`; return; }
+
+  const items = itinItems.filter(i=>i.date===date);
+  const wd = items[0]?.weekday || '';
+
+  let html = '';
+  const route = getDayRoute(date);
+  if(route.length){
+    html += `<div class="day-route">${route.map((s,idx)=>
+      (idx===0?'':'<span class="arrow">→</span>') + `<span class="stop">${escapeHtml(s)}</span>`
+    ).join('')}</div>`;
+  }
+  html += `<div class="day-summary">
+    <span class="dtitle">${date.replace(/^\d+\//,m=>m)} ${wd}</span>
+    <span class="dcost">當日預估花費 ${fmtNTD(dayTotal(date))}</span>
+  </div>`;
+  items.forEach((i, idx) => html += itinCardHtml(i, idx === items.length - 1));
+  html += `<button class="add-btn" data-additin>＋ 在這天新增行程</button>`;
+  view.innerHTML = html;
+
+  view.querySelector('[data-additin]').addEventListener('click', ()=>{
+    itinItems.push({id:newId('i'), date, weekday:wd, time:'12:00', durH:'1小時', durM:'0分鐘', type:'', desc:'新行程項目', item:'', status:'', jpy:'', ntd:'', note:'', done:false});
+    saveKey('itinItems', itinItems);
+    renderItin();
+  });
+
+  bindItinCardEvents(view);
+}
+
+function itinCardHtml(i, isLast){
+  const typeClass = i.type ? 'type-'+i.type : 'type-空';
+  const durBlock = isLast
+    ? `<div class="itin-last-note">當日<br>最後一項</div>`
+    : `<div class="itin-dur">
+        <select data-field="durH">${HOUR_OPTIONS.map(h=>`<option ${h===i.durH?'selected':''}>${h}</option>`).join('')}</select>
+        <select data-field="durM">${MIN_OPTIONS.map(m=>`<option ${m===i.durM?'selected':''}>${m||'－'}</option>`).join('')}</select>
+      </div>`;
+  return `
+  <div class="card itin-card ${i.done?'done':''}" data-id="${i.id}">
+    <div>
+      <div class="itin-time"><input value="${escapeHtml(i.time)}" data-field="time" placeholder="--:--"></div>
+      ${durBlock}
+    </div>
+    <div class="itin-line"></div>
+    <div class="itin-body">
+      <div class="type-row">
+        <select class="type-badge-select ${typeClass}" data-field="type">
+          <option value="" ${i.type===''?'selected':''}>類型</option>
+          <option value="交通" ${i.type==='交通'?'selected':''}>交通</option>
+          <option value="景點" ${i.type==='景點'?'selected':''}>景點</option>
+          <option value="飯店" ${i.type==='飯店'?'selected':''}>飯店</option>
+          <option value="吃飯" ${i.type==='吃飯'?'selected':''}>吃飯</option>
+        </select>
+        <button class="done-toggle ${i.done?'on':''}" data-toggledone title="標記完成">✓</button>
+      </div>
+      <textarea class="itin-desc" data-field="desc" rows="1" placeholder="行程說明">${escapeHtml(i.desc)}</textarea>
+      <div class="itin-sub">
+        <input class="item-input" data-field="item" value="${escapeHtml(i.item)}" placeholder="預訂項目（選填）">
+        <select class="status-select" data-field="status">
+          ${STATUS_OPTIONS.map(s=>`<option value="${escapeHtml(s)}" ${s===i.status?'selected':''}>${s||'狀態'}</option>`).join('')}
+        </select>
+      </div>
+      <div class="itin-sub">
+        <input class="item-input" data-field="jpy" value="${escapeHtml(i.jpy)}" placeholder="¥ 日幣" style="flex:0 0 84px;">
+        <input class="item-input" data-field="ntd" value="${escapeHtml(i.ntd)}" placeholder="NT$ 台幣" style="flex:0 0 96px;">
+      </div>
+      <textarea class="txt-area itin-note" data-field="note" rows="1" placeholder="備註／連結">${escapeHtml(i.note)}</textarea>
+      <div class="row-actions">
+        <button class="icon-btn" data-move="-1">↑ 上移</button>
+        <button class="icon-btn" data-move="1">↓ 下移</button>
+        <button class="icon-btn" data-del>🗑 刪除</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindItinCardEvents(scope){
+  scope.querySelectorAll('.itin-card').forEach(card=>{
+    const id = card.dataset.id;
+    const item = itinItems.find(i=>i.id===id);
+    if(!item) return;
+
+    card.querySelectorAll('[data-field]').forEach(inp=>{
+      if(inp.tagName==='TEXTAREA') autoGrow(inp);
+      const evt = (inp.tagName==='SELECT') ? 'change' : 'input';
+      inp.addEventListener(evt, ()=>{
+        item[inp.dataset.field] = inp.value;
+        if(inp.tagName==='TEXTAREA') autoGrow(inp);
+        if(inp.dataset.field==='type'){
+          saveKey('itinItems', itinItems);
+          renderItin();
+          return;
+        }
+        saveDebounced('itinItems', ()=>itinItems);
+        if(inp.dataset.field==='ntd') renderDaychips(); // keep chips in sync (cheap)
+      });
+      if(inp.dataset.field==='ntd'){
+        inp.addEventListener('blur', renderItin);
+      }
+    });
+
+    card.querySelector('[data-toggledone]').addEventListener('click', ()=>{
+      item.done = !item.done;
+      saveKey('itinItems', itinItems);
+      renderItin();
+    });
+
+    card.querySelectorAll('[data-move]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const dir = parseInt(btn.dataset.move);
+        const dateItems = itinItems.filter(i=>i.date===item.date);
+        const globalIdx = itinItems.indexOf(item);
+        const posInDay = dateItems.indexOf(item);
+        const swapWith = dateItems[posInDay+dir];
+        if(!swapWith) return;
+        const swapGlobalIdx = itinItems.indexOf(swapWith);
+        [itinItems[globalIdx], itinItems[swapGlobalIdx]] = [itinItems[swapGlobalIdx], itinItems[globalIdx]];
+        saveKey('itinItems', itinItems);
+        renderItin();
+      });
+    });
+
+    card.querySelector('[data-del]').addEventListener('click', async ()=>{
+      const ok = await showConfirm('確定要刪除這個行程項目嗎？');
+      if(!ok) return;
+      itinItems = itinItems.filter(i=>i.id!==id);
+      saveKey('itinItems', itinItems);
+      renderItin();
+    });
+  });
+}
+
+/* ================================================================
+   SHOPPING TAB
+================================================================= */
+function renderShop(){
+  document.getElementById('daychips').style.display = 'none';
+  const view = document.getElementById('view');
+  let whos = ['全部', ...new Set(shopItems.map(s=>s.who).filter(Boolean))];
+  const meIdx = whos.indexOf('我');
+  if(meIdx > 1){ whos.splice(meIdx,1); whos.splice(1,0,'我'); }
+  const channelChoices = ['全部', ...channelOptions, '其他'];
+
+  const itemMatchesChannel = itemMatchesChannelG;
+
+  let html = `<div class="rate-bar">
+    <span>💱 匯率（與行前準備共用）</span>
+    <span>¥1 = <input id="shopRateInput" type="number" step="0.001" min="0" value="${exchangeRate}"> NT$</span>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">訂購人</span>
+    <div class="who-tabs">${whos.map(w=>
+      `<div class="who-tab ${w===currentWhoFilter?'active':''}" data-who="${escapeHtml(w)}">${escapeHtml(w)}</div>`
+    ).join('')}<div class="who-tab" data-addwho>＋ 新增訂購人</div></div>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">購買通路</span>
+    <div class="who-tabs">${channelChoices.map(c=>
+      `<div class="who-tab channel-tab ${c===currentChannelFilter?'active':''}" data-channelfilter="${escapeHtml(c)}">${escapeHtml(c)}</div>`
+    ).join('')}<div class="who-tab channel-tab add-chan" data-addchannel>＋ 通路</div></div>
+  </div>`;
+
+  const shown = currentWhoFilter==='全部' ? whos.filter(w=>w!=='全部') : [currentWhoFilter];
+  let grandTotalNtd = 0, grandTotalJpy = 0;
+  let anyShown = false;
+
+  shown.forEach(who=>{
+    const items = shopItems.filter(s=>s.who===who && itemMatchesChannel(s));
+    if(items.length===0) return;
+    anyShown = true;
+    const sub = sumPair(items);
+    grandTotalNtd += sub.ntd; grandTotalJpy += sub.jpy;
+    html += `<div class="who-group-title">${escapeHtml(who)}<span class="gsub" data-groupsub="${escapeHtml(who)}">${items.length} 項・${fmtNTD(sub.ntd)} ／ ${fmtJPY(sub.jpy)}</span></div>`;
+    items.forEach(it => html += shopCardHtml(it));
+    html += `<button class="add-btn" data-addshop="${escapeHtml(who)}">＋ 新增給「${escapeHtml(who)}」的代購項目</button>`;
+  });
+
+  if(!anyShown){
+    html += `<p class="empty-note">這個篩選條件下沒有項目。</p>`;
+  }
+
+  html += `<div class="total-bar" style="position:static; margin-top:18px;">
+    <span>${(currentWhoFilter==='全部' && currentChannelFilter==='全部') ? '代購總金額' : '目前篩選小計'}</span>
+    <span data-grandtotal><b>${fmtNTD(grandTotalNtd)}</b> ／ ${fmtJPY(grandTotalJpy)}</span>
+  </div>`;
+
+  view.innerHTML = html;
+
+  const rateInp = document.getElementById('shopRateInput');
+  if(rateInp){
+    rateInp.addEventListener('input', ()=>{
+      exchangeRate = parseFloat(rateInp.value) || 0;
+      saveDebounced('exchangeRate', ()=>exchangeRate);
+      refreshShopTotals();
+    });
+    rateInp.addEventListener('blur', ()=>{ saveKey('exchangeRate', exchangeRate); refreshShopTotals(); });
+  }
+  const addChanBtn = view.querySelector('[data-addchannel]');
+  if(addChanBtn) addChanBtn.addEventListener('click', async ()=>{
+    const name = await showPrompt('新增購買通路：', '例如：Loft');
+    const n = addChannelOption(name);
+    if(!n) return;
+    currentChannelFilter = n;
+    renderShop();
+  });
+
+  view.querySelectorAll('[data-who]').forEach(tab=>{
+    tab.addEventListener('click', ()=>{ currentWhoFilter = tab.dataset.who; renderShop(); });
+  });
+  view.querySelectorAll('[data-channelfilter]').forEach(tab=>{
+    tab.addEventListener('click', ()=>{ currentChannelFilter = tab.dataset.channelfilter; renderShop(); });
+  });
+  const addWhoBtn = view.querySelector('[data-addwho]');
+  if(addWhoBtn) addWhoBtn.addEventListener('click', async ()=>{
+    const name = await showPrompt('新增訂購人姓名：', '例如：媽媽');
+    if(!name) return;
+    shopItems.push(blankShopItem(name));
+    saveKey('shopItems', shopItems);
+    currentWhoFilter = name;
+    renderShop();
+  });
+  view.querySelectorAll('[data-addshop]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      shopItems.push(blankShopItem(b.dataset.addshop));
+      saveKey('shopItems', shopItems);
+      renderShop();
+    });
+  });
+
+  bindShopCardEvents(view);
+}
+
+function blankShopItem(who){
+  return {id:newId('s'), who, name:'新商品', variant:'', qty:'1', currency:'jpy', unitPrice:'', channels:[], channelOther:false, channelOtherText:'', note:'', bought:false};
+}
+
+function moneyBlockHtml(s){
+  return `
+  <div class="calc-line">
+    <button type="button" class="cur-chip ${s.currency}" data-curtoggle>${s.currency==='jpy'?'JPY':'NTD'}</button>
+    <div class="price-field"><span class="cur-sym">${curSym(s.currency)}</span><input data-field="unitPrice" inputmode="decimal" placeholder="0" value="${escapeHtml(s.unitPrice||'')}"></div>
+    <span class="op">×</span>
+    <select class="qty-select" data-qty>${qtyOptionsHtml(s)}</select>
+    <span class="op">=</span>
+    <span class="calc-sum" data-subtotal="${s.id}">${subtotalHtml(s)}</span>
+  </div>`;
+}
+
+function shopCardHtml(s){
+  const img = shopImages[s.id];
+  const isActive = activeImageTarget === s.id;
+  return `
+  <div class="card shop-card ${s.bought?'done':''}" data-id="${s.id}">
+    ${img ? `<div class="imgSlot" data-imgview title="點擊放大、調整顯示範圍"><img src="${img}" style="object-position:${escapeHtml(s.imgPos||'50% 50%')}"></div>` : ''}
+    <div class="shop-body">
+      <div class="shop-top">
+        <div style="flex:1; min-width:0;">
+          <input class="shop-name" data-field="name" value="${escapeHtml(s.name)}" placeholder="商品名稱">
+          <input class="shop-variant" data-field="variant" value="${escapeHtml(s.variant)}" placeholder="款式／顏色（選填）">
+        </div>
+        <button class="buy-toggle ${s.bought?'on':''}" data-togglebuy title="標記已購買">✓</button>
+      </div>
+      <div class="imgActions">
+        <button class="mini-btn" data-upload>📁 上傳圖片</button>
+        <button class="mini-btn ${isActive?'on':''}" data-imgslot>${isActive ? '✅ 可直接貼上（Ctrl+V）' : '📋 設為貼上目標'}</button>
+        ${img ? `<button class="mini-btn" data-removeimg>移除圖片</button>` : ''}
+      </div>
+      ${moneyBlockHtml(s)}
+      <div class="field-label">購買通路（可複選）</div>
+      <div class="channel-pills">
+        ${channelOptions.map(c=>`<button type="button" class="channel-pill ${(s.channels||[]).includes(c)?'active':''}" data-channel="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')}
+        <button type="button" class="channel-pill ${s.channelOther?'active':''}" data-channel-other>其他</button>
+        <button type="button" class="channel-pill add-chan" data-addchannel-item>＋ 新增</button>
+      </div>
+      ${s.channelOther ? `<input class="txt-input" data-field="channelOtherText" value="${escapeHtml(s.channelOtherText||'')}" placeholder="輸入自訂通路名稱" style="margin-top:6px;">` : ''}
+      <textarea class="txt-area" data-field="note" rows="1" placeholder="備註" style="margin-top:8px;">${escapeHtml(s.note)}</textarea>
+      <div class="row-actions"><button class="icon-btn" data-del>🗑 刪除</button></div>
+    </div>
+  </div>`;
+}
+
+function bindShopCardEvents(scope){
+  scope.querySelectorAll('.shop-card').forEach(card=>{
+    const id = card.dataset.id;
+    const item = shopItems.find(s=>s.id===id);
+    if(!item) return;
+
+    card.querySelectorAll('[data-field]').forEach(inp=>{
+      if(inp.tagName==='TEXTAREA') autoGrow(inp);
+      inp.addEventListener('input', ()=>{
+        item[inp.dataset.field] = inp.value;
+        if(inp.tagName==='TEXTAREA') autoGrow(inp);
+        saveDebounced('shopItems', ()=>shopItems);
+      });
+      if(inp.dataset.field === 'unitPrice') inp.addEventListener('input', ()=>refreshShopTotals());
+    });
+
+    card.querySelectorAll('[data-channel]').forEach(pill=>{
+      pill.addEventListener('click', ()=>{
+        const ch = pill.dataset.channel;
+        if(!Array.isArray(item.channels)) item.channels = [];
+        const idx = item.channels.indexOf(ch);
+        if(idx===-1) item.channels.push(ch); else item.channels.splice(idx,1);
+        saveKey('shopItems', shopItems);
+        renderShop();
+      });
+    });
+    const qtySel = card.querySelector('[data-qty]');
+    if(qtySel) qtySel.addEventListener('change', async ()=>{
+      if(qtySel.value === '__custom'){
+        const v = await showPrompt('輸入數量：', '例如：24');
+        const n = Math.round(parseAmount(v));
+        if(n > 0) item.qty = String(n);
+        saveKey('shopItems', shopItems);
+        renderShop();
+        return;
+      }
+      item.qty = qtySel.value;
+      saveKey('shopItems', shopItems);
+      refreshShopTotals();
+    });
+    card.querySelectorAll('[data-cur]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        item.currency = b.dataset.cur;
+        saveKey('shopItems', shopItems);
+        renderShop();
+      });
+    });
+    const curToggle = card.querySelector('[data-curtoggle]');
+    if(curToggle) curToggle.addEventListener('click', ()=>{
+      item.currency = item.currency === 'jpy' ? 'ntd' : 'jpy';
+      saveKey('shopItems', shopItems);
+      renderShop();
+    });
+    const addChanItem = card.querySelector('[data-addchannel-item]');
+    if(addChanItem) addChanItem.addEventListener('click', async ()=>{
+      const name = await showPrompt('新增購買通路：', '例如：Loft');
+      const n = addChannelOption(name);
+      if(!n) return;
+      if(!Array.isArray(item.channels)) item.channels = [];
+      if(!item.channels.includes(n)) item.channels.push(n);
+      saveKey('shopItems', shopItems);
+      renderShop();
+    });
+
+    const otherPill = card.querySelector('[data-channel-other]');
+    if(otherPill) otherPill.addEventListener('click', ()=>{
+      item.channelOther = !item.channelOther;
+      saveKey('shopItems', shopItems);
+      renderShop();
+    });
+
+    card.querySelector('[data-togglebuy]').addEventListener('click', ()=>{
+      item.bought = !item.bought;
+      saveKey('shopItems', shopItems);
+      renderShop();
+    });
+
+    const imgView = card.querySelector('[data-imgview]');
+    if(imgView) imgView.addEventListener('click', ()=>openImageViewer(id));
+
+    card.querySelectorAll('[data-imgslot]').forEach(el=>el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      activeImageTarget = (activeImageTarget===id) ? null : id;
+      renderShop();
+    }));
+
+    card.querySelector('[data-upload]').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const fi = document.getElementById('fileInput');
+      fi.onchange = async ()=>{
+        if(fi.files && fi.files[0]) await handleImageFile(id, fi.files[0]);
+        fi.value = '';
+      };
+      fi.click();
+    });
+
+    const removeBtn = card.querySelector('[data-removeimg]');
+    if(removeBtn) removeBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      delete shopImages[id];
+      deleteKey('img:'+id);
+      renderShop();
+    });
+
+    card.querySelector('[data-del]').addEventListener('click', async ()=>{
+      const ok = await showConfirm('確定要刪除這個代購項目嗎？');
+      if(!ok) return;
+      shopItems = shopItems.filter(s=>s.id!==id);
+      delete shopImages[id];
+      deleteKey('img:'+id);
+      saveKey('shopItems', shopItems);
+      renderShop();
+    });
+  });
+}
+
+/* ---------- image handling: compress + store ---------- */
+/* 只等比例縮小檔案大小，不裁切內容，讓完整照片都能被存下來、之後完整顯示。 */
+function compressImage(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const maxDim = 900;
+        let w = img.width, h = img.height;
+        if(w > maxDim || h > maxDim){
+          if(w > h){ h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.78));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleImageFile(id, file){
+  try{
+    const dataUrl = await compressImage(file);
+    shopImages[id] = dataUrl;
+    saveRaw('img:'+id, dataUrl);
+    renderShop();
+  }catch(e){ console.error('image compress fail', e); }
+}
+
+/* ---------- image viewer: zoom + reposition ---------- */
+let viewerId = null, viewerAdjust = false, viewerPos = {x:50, y:50};
+function parsePos(p){
+  const m = String(p || '50% 50%').match(/(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%/);
+  return m ? {x:parseFloat(m[1]), y:parseFloat(m[2])} : {x:50, y:50};
+}
+function openImageViewer(id){
+  if(!shopImages[id]) return;
+  viewerId = id; viewerAdjust = false;
+  const it = shopItems.find(s=>s.id===id);
+  viewerPos = parsePos(it && it.imgPos);
+  renderViewer();
+  document.getElementById('imgViewer').classList.add('show');
+}
+function closeImageViewer(){
+  document.getElementById('imgViewer').classList.remove('show');
+  viewerId = null; viewerAdjust = false;
+}
+function renderViewer(){
+  const url = shopImages[viewerId];
+  if(!url) return;
+  const body = document.getElementById('imgViewerBody');
+  const hint = document.getElementById('imgViewerHint');
+  const acts = document.getElementById('imgViewerActions');
+  if(!viewerAdjust){
+    body.innerHTML = '<img class="viewer-full" src="' + url + '">';
+    hint.textContent = '想換縮圖露出的部分，按「調整顯示範圍」';
+    acts.innerHTML = '<button class="modal-btn modal-btn-cancel" data-vclose>關閉</button><button class="modal-btn modal-btn-ok" data-vadjust>調整顯示範圍</button>';
+  } else {
+    body.innerHTML = '<div class="crop-box" id="cropBox"><img src="' + url + '" style="object-position:' + viewerPos.x + '% ' + viewerPos.y + '%"></div>';
+    hint.textContent = '在框內拖曳，移到你最想看清楚的部分';
+    acts.innerHTML = '<button class="modal-btn modal-btn-cancel" data-vcancel>取消</button><button class="modal-btn modal-btn-ok" data-vsave>儲存</button>';
+    bindCropDrag();
+  }
+}
+function bindCropDrag(){
+  const el = document.getElementById('cropBox');
+  const img = el.querySelector('img');
+  let sx = 0, sy = 0, px = 50, py = 50, dragging = false;
+  el.addEventListener('pointerdown', e=>{
+    dragging = true; el.setPointerCapture(e.pointerId);
+    sx = e.clientX; sy = e.clientY; px = viewerPos.x; py = viewerPos.y;
+    el.style.cursor = 'grabbing';
+  });
+  el.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    const r = el.getBoundingClientRect();
+    viewerPos.x = Math.max(0, Math.min(100, px - (e.clientX - sx) / r.width * 100));
+    viewerPos.y = Math.max(0, Math.min(100, py - (e.clientY - sy) / r.height * 100));
+    img.style.objectPosition = viewerPos.x + '% ' + viewerPos.y + '%';
+  });
+  const stop = ()=>{ dragging = false; el.style.cursor = 'grab'; };
+  el.addEventListener('pointerup', stop);
+  el.addEventListener('pointercancel', stop);
+}
+function bindImageViewer(){
+  const ov = document.getElementById('imgViewer');
+  ov.addEventListener('click', e=>{
+    if(e.target === ov){ closeImageViewer(); return; }
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    if(btn.hasAttribute('data-vclose')) closeImageViewer();
+    else if(btn.hasAttribute('data-vadjust')){ viewerAdjust = true; renderViewer(); }
+    else if(btn.hasAttribute('data-vcancel')){
+      const it = shopItems.find(s=>s.id===viewerId);
+      viewerPos = parsePos(it && it.imgPos);
+      viewerAdjust = false; renderViewer();
+    }
+    else if(btn.hasAttribute('data-vsave')){
+      const it = shopItems.find(s=>s.id===viewerId);
+      if(it){
+        it.imgPos = Math.round(viewerPos.x) + '% ' + Math.round(viewerPos.y) + '%';
+        saveKey('shopItems', shopItems);
+      }
+      closeImageViewer();
+      renderShop();
+    }
+  });
+}
+
+function bindGlobalPaste(){
+  document.addEventListener('paste', (e)=>{
+    if(currentTab !== 'shop' || !activeImageTarget) return;
+    const items = e.clipboardData && e.clipboardData.items;
+    if(!items) return;
+    for(const it of items){
+      if(it.type.indexOf('image') !== -1){
+        const file = it.getAsFile();
+        if(file) handleImageFile(activeImageTarget, file);
+        e.preventDefault();
+        break;
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
