@@ -242,6 +242,12 @@
     display:flex; justify-content:space-between; align-items:baseline;
   }
   .who-group-title .gsub{font-family:'Noto Sans TC',sans-serif; font-weight:500; font-size:12px; color:var(--ink-soft);}
+  .who-rename{
+  font-family:'Noto Serif TC',serif; font-weight:600; font-size:14.5px; color:var(--ink);
+  border:none; background:transparent; padding:1px 2px; margin:-1px -2px; border-radius:4px;
+  min-width:1.5em;
+}
+.who-rename:hover, .who-rename:focus{background:var(--paper-soft); outline:none;}
   .channel-pills{display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;}
   .channel-pill{
     border:1px solid var(--line); background:var(--paper-soft); border-radius:16px;
@@ -1263,7 +1269,7 @@ function renderShop(){
     anyShown = true;
     const sub = sumPair(items);
     grandTotalNtd += sub.ntd; grandTotalJpy += sub.jpy;
-    html += `<div class="who-group-title">${escapeHtml(who)}<span class="gsub" data-groupsub="${escapeHtml(who)}">${items.length} 項・${fmtNTD(sub.ntd)} ／ ${fmtJPY(sub.jpy)}</span></div>`;
+    html += `<div class="who-group-title"><input class="who-rename" data-oldwho="${escapeHtml(who)}" value="${escapeHtml(who)}" size="${Math.max(2, who.length)}"><span class="gsub" data-groupsub="${escapeHtml(who)}">${items.length} 項・${fmtNTD(sub.ntd)} ／ ${fmtJPY(sub.jpy)}</span></div>`;
     items.forEach(it => html += shopCardHtml(it));
     html += `<button class="add-btn" data-addshop="${escapeHtml(who)}">＋ 新增給「${escapeHtml(who)}」的代購項目</button>`;
   });
@@ -1311,6 +1317,20 @@ function renderShop(){
     saveKey('shopItems', shopItems);
     currentWhoFilter = name;
     renderShop();
+  });
+    view.querySelectorAll('.who-rename').forEach(inp=>{
+    inp.addEventListener('input', ()=>{ inp.size = Math.max(2, inp.value.length); });
+    const commitRename = ()=>{
+      const oldWho = inp.dataset.oldwho;
+      const newWho = inp.value.trim();
+      if(!newWho || newWho === oldWho){ inp.value = oldWho; inp.size = Math.max(2, oldWho.length); return; }
+      shopItems.forEach(s => { if(s.who === oldWho) s.who = newWho; });
+      saveKey('shopItems', shopItems);
+      if(currentWhoFilter === oldWho) currentWhoFilter = newWho;
+      renderShop();
+    };
+    inp.addEventListener('blur', commitRename);
+    inp.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') inp.blur(); });
   });
   view.querySelectorAll('[data-addshop]').forEach(b=>{
     b.addEventListener('click', ()=>{
