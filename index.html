@@ -1098,7 +1098,34 @@ function renderDaychips(){
 function dayTotal(date){
   return itinItems.filter(i=>i.date===date).reduce((s,i)=>s+parseAmount(i.ntd),0);
 }
-
+/* ---------- 時間自動接續 ---------- */
+function parseTimeToMin(str){
+  const m = String(str || '').match(/^(\d{1,2})\s*[:：]\s*(\d{1,2})$/);
+  if(!m) return null;
+  const h = parseInt(m[1],10), mm = parseInt(m[2],10);
+  if(isNaN(h) || isNaN(mm) || h > 23 || mm > 59) return null;
+  return h*60 + mm;
+}
+function fmtMinToTime(total){
+  const t = ((total % 1440) + 1440) % 1440;
+  return String(Math.floor(t/60)).padStart(2,'0') + ':' + String(t%60).padStart(2,'0');
+}
+function durationMinutes(i){
+  if(i.durH === '～休息') return null;
+  return (parseInt(i.durH,10)||0)*60 + (parseInt(i.durM,10)||0);
+}
+function recalcDayTimes(date, fromId){
+  const items = itinItems.filter(i => i.date === date);
+  let start = fromId ? items.findIndex(i => i.id === fromId) : 0;
+  if(start === -1) start = 0;
+  for(let k = start; k < items.length - 1; k++){
+    const cur = items[k], next = items[k+1];
+    const mins = durationMinutes(cur);
+    const t = parseTimeToMin(cur.time);
+    if(mins === null || t === null) break;
+    next.time = fmtMinToTime(t + mins);
+  }
+}
 function renderItin(){
   document.getElementById('daychips').style.display = 'flex';
   renderDaychips();
@@ -1198,9 +1225,23 @@ function bindItinCardEvents(scope){
           renderItin();
           return;
         }
+        if(inp.dataset.field==='durH' || inp.dataset.field==='durM'){
+          recalcDayTimes(item.date, item.id);
+          saveKey('itinItems', itinItems);
+          renderItin();
+          return;
+        }
         saveDebounced('itinItems', ()=>itinItems);
-        if(inp.dataset.field==='ntd') renderDaychips(); // keep chips in sync (cheap)
+        if(inp.dataset.field==='ntd') renderDaychips();
       });
+      if(inp.dataset.field==='time'){
+        inp.addEventListener('blur', ()=>{
+          recalcDayTimes(item.date, item.id);
+          saveKey('itinItems', itinItems);
+          renderItin();
+        });
+        inp.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') inp.blur(); });
+      }
       if(inp.dataset.field==='ntd'){
         inp.addEventListener('blur', renderItin);
       }
